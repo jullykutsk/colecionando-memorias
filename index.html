@@ -32,15 +32,14 @@
             sans: ['Plus Jakarta Sans', 'sans-serif'],
           },
           colors: {
-            // Nova paleta aconchegante (Terracota, Bege e Creme)
             palette: {
-              primary: '#D35400',    // Laranja queimado / Terracota forte
-              secondary: '#F5EEF0',  // Rosa/bege muito suave para fundos secundários
-              accent: '#E67E22',     // Laranja suave para destaques
-              dark: '#4A235A',       // Castanho escuro/vinho elegante para textos principais
-              cardbg: '#FFFFFF',     // Branco puro para os cartões
-              border: '#EADCD7',     // Borda suave em tom linho
-              bg: '#FAF6F0'          // Fundo de papel creme aconchegante
+              primary: '#D35400',
+              secondary: '#F5EEF0',
+              accent: '#E67E22',
+              dark: '#4A235A',
+              cardbg: '#FFFFFF',
+              border: '#EADCD7',
+              bg: '#FAF6F0'
             }
           }
         }
@@ -293,11 +292,8 @@
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <span className="text-xs font-semibold text-palette-primary uppercase tracking-widest">
-                        Toque para abrir a mensagem
-                      </span>
                       <h2 className="font-serif text-2xl md:text-3xl font-bold text-palette-dark group-hover:text-palette-primary transition">
-                        1. Uma Jornada de Descobertas ✨
+                        Uma Jornada de Descobertas
                       </h2>
                     </div>
                     <span className="text-2xl text-palette-primary font-bold group-hover:translate-x-1 transition">→</span>
@@ -548,7 +544,7 @@
                             ? 'bg-palette-primary text-white border-palette-primary shadow-md scale-105'
                             : m.status === 'completed'
                             ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
-                            : 'bg-palette-secondary/40 text-palette-dark border-palette-border hover:bg-palette-secondary'
+                            : 'bg-palette-secondary/40 text-palette-dark border border-palette-border hover:bg-palette-secondary'
                         }`}
                       >
                         <span className="text-xs uppercase font-sans tracking-widest opacity-80">
