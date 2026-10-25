@@ -74,12 +74,10 @@
   <script type="text/babel">
     const { useState, useEffect } = React;
 
-    // --- Dados do Formulário e do Banco de Ideias ---
     const CATEGORIES = [
       {
         id: 'A',
         title: 'A. Natureza e Água',
-        icon: 'Trees',
         items: [
           'Tomar banho em uma cachoeira',
           'Fazer uma trilha ao ar livre',
@@ -96,7 +94,6 @@
       {
         id: 'B',
         title: 'B. Aventura e Novas Sensações',
-        icon: 'Compass',
         items: [
           'Fazer escalada indoor',
           'Andar a cavalo',
@@ -112,7 +109,6 @@
       {
         id: 'C',
         title: 'C. Animais e Descobertas',
-        icon: 'Dog',
         items: [
           'Ter contato direto com animais',
           'Visitar uma fazenda ou sítio',
@@ -124,7 +120,6 @@
       {
         id: 'D',
         title: 'D. Cultura, Arte e Criatividade',
-        icon: 'Palette',
         items: [
           'Visitar um museu ou exposição',
           'Ir ao teatro ou concerto',
@@ -142,7 +137,6 @@
       {
         id: 'E',
         title: 'E. Jogos, Desafios e Diversão',
-        icon: 'Gamepad2',
         items: [
           'Participar de um Escape Room',
           'Jogar jogos de tabuleiro à tarde',
@@ -157,7 +151,6 @@
       {
         id: 'F',
         title: 'F. Gastronomia e Experiências',
-        icon: 'Utensils',
         items: [
           'Passeio gastronômico na cidade',
           'Conhecer um restaurante exótico',
@@ -172,7 +165,6 @@
       {
         id: 'G',
         title: 'G. Encontros e Momentos Especiais',
-        icon: 'Heart',
         items: [
           'Passeio tranquilo sem pressa',
           'Conversa profunda em um lugar bonito',
@@ -197,7 +189,7 @@
       timeDeparture: '',
       timeReturn: '',
       spoiler: '',
-      status: 'planned', // 'planned' ou 'completed'
+      status: 'planned',
       memory: {
         photo: null,
         word: '',
@@ -208,7 +200,6 @@
       }
     }));
 
-    // --- Componente Principal ---
     function App() {
       const [activeTab, setActiveTab] = useState('home');
       const [ratings, setRatings] = useState(() => {
@@ -254,7 +245,6 @@
 
       return (
         <div className="max-w-4xl mx-auto px-4 py-6">
-          {/* Cabeçalho */}
           <header className="text-center my-8 border-b border-journal-border pb-8">
             <span className="inline-block px-3 py-1 bg-terracotta-100 text-terracotta-700 rounded-full text-xs font-semibold tracking-wider uppercase mb-3">
               Guia de Amizade & Relacionamento
@@ -266,7 +256,6 @@
               "Doze experiências, descobertas e momentos especiais para viver juntos."
             </p>
 
-            {/* Barra de Progresso */}
             <div className="mt-6 max-w-xs mx-auto bg-journal-secondary p-3 rounded-2xl border border-journal-border">
               <div className="flex justify-between text-xs font-semibold text-journal-text mb-1">
                 <span>Jornada dos 12 Encontros</span>
@@ -281,19 +270,18 @@
             </div>
           </header>
 
-          {/* Navegação Principal */}
-          <nav className="flex justify-center gap-2 md:gap-4 mb-8 overflow-x-auto pb-2">
+          <nav className="flex justify-center gap-2 md:gap-3 mb-8 overflow-x-auto pb-2">
             {[
-              { id: 'home', label: 'Introdução', icon: 'BookOpen' },
-              { id: 'form', label: 'Formulário & Afinidades', icon: 'Sparkles' },
-              { id: 'ideas', label: 'Banco de Ideias', icon: 'Lightbulb' },
-              { id: 'meetings', label: '12 Encontros', icon: 'Calendar' },
-              { id: 'memories', label: 'Diário de Memórias', icon: 'Camera' }
+              { id: 'home', label: 'Introdução' },
+              { id: 'form', label: 'Formulário' },
+              { id: 'ideas', label: 'Banco de Ideias' },
+              { id: 'meetings', label: '12 Encontros' },
+              { id: 'memories', label: 'Memórias' }
             ].map(tab => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm transition-all whitespace-nowrap ${
+                className={`px-4 py-2.5 rounded-xl font-medium text-sm transition-all whitespace-nowrap ${
                   activeTab === tab.id
                     ? 'bg-terracotta-600 text-white shadow-md'
                     : 'bg-white/80 text-journal-text hover:bg-journal-secondary border border-journal-border'
@@ -304,9 +292,7 @@
             ))}
           </nav>
 
-          {/* CONTEÚDO DAS ABAS */}
           <main>
-            {/* 1. INTRODUÇÃO */}
             {activeTab === 'home' && (
               <div className="bg-white p-6 md:p-8 rounded-3xl border border-journal-border shadow-sm space-y-6">
                 <div className="border-l-4 border-terracotta-600 pl-4 py-1">
@@ -322,8 +308,8 @@
 
                 <div className="grid md:grid-cols-2 gap-4 my-6">
                   <div className="p-5 bg-journal-bg rounded-2xl border border-journal-border">
-                    <h3 className="font-semibold text-terracotta-700 text-lg mb-2 flex items-center gap-2">
-                      <span>1. Alternar a Responsabilidade</span>
+                    <h3 className="font-semibold text-terracotta-700 text-lg mb-2">
+                      1. Alternar a Responsabilidade
                     </h3>
                     <p className="text-sm text-journal-text/80">
                       Ao longo dos 12 encontros, cada um fica responsável por organizar a experiência. Quem organiza escolhe a atividade, pesquisa e cuida dos detalhes.
@@ -331,8 +317,8 @@
                   </div>
 
                   <div className="p-5 bg-journal-bg rounded-2xl border border-journal-border">
-                    <h3 className="font-semibold text-terracotta-700 text-lg mb-2 flex items-center gap-2">
-                      <span>2. Respeitar o Ritmo</span>
+                    <h3 className="font-semibold text-terracotta-700 text-lg mb-2">
+                      2. Respeitar o Ritmo
                     </h3>
                     <p className="text-sm text-journal-text/80">
                       Não se trata de cumprir uma lista ou fazer tudo dar certo. Não precisamos fazer grandes viagens ou gastar muito. O objetivo é criar oportunidades leves.
@@ -357,7 +343,6 @@
               </div>
             )}
 
-            {/* 2. FORMULÁRIO DE PREFERÊNCIAS */}
             {activeTab === 'form' && (
               <div className="space-y-6">
                 <div className="bg-white p-6 rounded-3xl border border-journal-border shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
@@ -370,32 +355,30 @@
                     </p>
                   </div>
 
-                  {/* Seletor de Pessoa */}
-                  <div className="flex bg-journal-bg p-1.5 rounded-2xl border border-journal-border">
+                  <div className="flex bg-journal-bg p-1.5 rounded-2xl border border-journal-border w-full md:w-auto justify-center">
                     <button
                       onClick={() => setActivePerson('person1')}
-                      className={`px-5 py-2 rounded-xl text-sm font-semibold transition ${
+                      className={`px-4 py-2 rounded-xl text-xs md:text-sm font-semibold transition ${
                         activePerson === 'person1'
                           ? 'bg-terracotta-600 text-white shadow-sm'
                           : 'text-journal-text/70 hover:text-journal-text'
                       }`}
                     >
-                      Preenchendo como: Pessoa 1
+                      Pessoa 1
                     </button>
                     <button
                       onClick={() => setActivePerson('person2')}
-                      className={`px-5 py-2 rounded-xl text-sm font-semibold transition ${
+                      className={`px-4 py-2 rounded-xl text-xs md:text-sm font-semibold transition ${
                         activePerson === 'person2'
                           ? 'bg-terracotta-600 text-white shadow-sm'
                           : 'text-journal-text/70 hover:text-journal-text'
                       }`}
                     >
-                      Preenchendo como: Pessoa 2
+                      Pessoa 2
                     </button>
                   </div>
                 </div>
 
-                {/* Sub-Aba: Formulário ou Afinidades Cruzadas */}
                 <div className="space-y-6">
                   {CATEGORIES.map(cat => (
                     <div key={cat.id} className="bg-white p-6 rounded-3xl border border-journal-border shadow-sm">
@@ -414,7 +397,6 @@
                                 {item}
                               </span>
 
-                              {/* Escala de Estrelas */}
                               <div className="flex items-center gap-1">
                                 {[1, 2, 3, 4, 5].map(star => (
                                   <button
@@ -439,7 +421,6 @@
                   ))}
                 </div>
 
-                {/* Resumo das Afinidades em Comum */}
                 <div className="bg-white p-6 rounded-3xl border border-journal-border shadow-sm">
                   <h3 className="font-serif font-bold text-2xl text-journal-text mb-2">
                     Afinidades Encontradas (Coincidências)
@@ -484,7 +465,6 @@
               </div>
             )}
 
-            {/* 3. BANCO DE IDEIAS */}
             {activeTab === 'ideas' && (
               <div className="bg-white p-6 md:p-8 rounded-3xl border border-journal-border shadow-sm space-y-6">
                 <div>
@@ -516,7 +496,6 @@
               </div>
             )}
 
-            {/* 4. OS 12 ENCONTROS */}
             {activeTab === 'meetings' && (
               <div className="space-y-6">
                 <div className="bg-white p-6 rounded-3xl border border-journal-border shadow-sm">
@@ -527,7 +506,6 @@
                     Selecione o número do encontro para planejar os detalhes ou registrar como foi.
                   </p>
 
-                  {/* Grid de Seleção dos 12 encontros */}
                   <div className="grid grid-cols-4 md:grid-cols-6 gap-3">
                     {meetings.map(m => (
                       <button
@@ -557,7 +535,6 @@
                   </div>
                 </div>
 
-                {/* Form de Edição do Encontro Selecionado */}
                 {(() => {
                   const currentMeeting = meetings.find(m => m.number === selectedMeetingNum);
                   if (!currentMeeting) return null;
@@ -585,7 +562,7 @@
                               : 'bg-journal-secondary text-journal-text border border-journal-border'
                           }`}
                         >
-                          {currentMeeting.status === 'completed' ? '✓ Encontro Concluído' : 'Marcar como Concluído'}
+                          {currentMeeting.status === 'completed' ? '✓ Concluído' : 'Marcar Feito'}
                         </button>
                       </div>
 
@@ -669,13 +646,13 @@
 
                       <div>
                         <label className="block text-xs font-semibold text-journal-text/70 mb-1">
-                          Pista ou Spoiler do Encontro (para manter a expectativa!)
+                          Pista ou Spoiler do Encontro
                         </label>
                         <textarea
                           rows="2"
                           value={currentMeeting.spoiler}
                           onChange={e => handleMeetingUpdate({ ...currentMeeting, spoiler: e.target.value })}
-                          placeholder="Ex: Traga roupas confortáveis e esteja preparado para se sujar de tinta!"
+                          placeholder="Ex: Traga roupas confortáveis..."
                           className="w-full p-3 bg-journal-bg border border-journal-border rounded-xl text-sm focus:outline-none focus:border-terracotta-500"
                         ></textarea>
                       </div>
@@ -685,7 +662,6 @@
               </div>
             )}
 
-            {/* 5. DIÁRIO DE MEMÓRIAS */}
             {activeTab === 'memories' && (
               <div className="space-y-6">
                 <div className="bg-white p-6 rounded-3xl border border-journal-border shadow-sm">
@@ -696,7 +672,6 @@
                     Guarde fotos, recordações e palavras especiais vividas em cada encontro.
                   </p>
 
-                  {/* Seletor do Encontro para Registrar Memória */}
                   <div className="flex gap-2 overflow-x-auto pb-2">
                     {meetings.map(m => (
                       <button
@@ -714,7 +689,6 @@
                   </div>
                 </div>
 
-                {/* Form do Diário de Memória */}
                 {(() => {
                   const currentMeeting = meetings.find(m => m.number === selectedMeetingNum);
                   if (!currentMeeting) return null;
@@ -751,7 +725,6 @@
                       </div>
 
                       <div className="grid md:grid-cols-2 gap-6">
-                        {/* Polaroid da Foto */}
                         <div className="flex flex-col items-center">
                           <div className="w-full bg-journal-bg p-4 rounded-2xl border border-journal-border shadow-inner text-center">
                             {memory.photo ? (
@@ -781,7 +754,6 @@
                           </div>
                         </div>
 
-                        {/* Campos de texto do diário */}
                         <div className="space-y-4">
                           <div>
                             <label className="block text-xs font-semibold text-journal-text/70 mb-1">
@@ -791,7 +763,7 @@
                               type="text"
                               value={memory.word || ''}
                               onChange={e => updateMemory('word', e.target.value)}
-                              placeholder="Ex: Mágico, Inesquecível, Divertido..."
+                              placeholder="Ex: Mágico, Inesquecível..."
                               className="w-full p-3 bg-journal-bg border border-journal-border rounded-xl text-sm focus:outline-none focus:border-terracotta-500 font-serif font-bold text-terracotta-700"
                             />
                           </div>
