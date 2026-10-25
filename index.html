@@ -19,9 +19,6 @@
   
   <!-- Babel para compilar JSX no navegador -->
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  
-  <!-- Lucide Icons -->
-  <script src="https://unpkg.com/lucide@latest"></script>
 
   <script>
     tailwind.config = {
@@ -213,6 +210,13 @@
       });
       const [selectedMeetingNum, setSelectedMeetingNum] = useState(1);
 
+      // Bloco de Notas para "Uma Jornada de Descobertas"
+      const [noteText, setNoteText] = useState(() => {
+        const saved = localStorage.getItem('guia_jornada_notes');
+        return saved !== null ? saved : 'Este é um convite para viver um tempo de descobertas, compartilhar experiências e fortalecer a amizade com tempo, carinho e liberdade. A ideia é sair um pouquinho da rotina, experimentar coisas novas e conhecer melhor os gostos, os sonhos e os jeitos de cada um.';
+      });
+      const [isEditingNote, setIsEditingNote] = useState(false);
+
       useEffect(() => {
         localStorage.setItem('guia_ratings', JSON.stringify(ratings));
       }, [ratings]);
@@ -222,10 +226,8 @@
       }, [meetings]);
 
       useEffect(() => {
-        if (window.lucide) {
-          window.lucide.createIcons();
-        }
-      });
+        localStorage.setItem('guia_jornada_notes', noteText);
+      }, [noteText]);
 
       const handleRating = (itemKey, stars) => {
         setRatings(prev => ({
@@ -296,12 +298,39 @@
                   <h2 className="font-serif text-2xl font-bold text-journal-text">
                     Uma Jornada de Descobertas
                   </h2>
-                  <p className="text-sm text-journal-text/60">A proposta e como funciona o guia</p>
+                  <p className="text-sm text-journal-text/60">Clique no bloco abaixo para editar ou anotar suas reflexões</p>
                 </div>
 
-                <p className="leading-relaxed text-journal-text/90">
-                  Este é um convite para viver um tempo de descobertas, compartilhar experiências e fortalecer a amizade com tempo, carinho e liberdade. A ideia é sair um pouquinho da rotina, experimentar coisas novas e conhecer melhor os gostos, os sonhos e os jeitos de cada um.
-                </p>
+                {/* Bloco de Notas Interativo */}
+                <div className="bg-amber-50/70 border-2 border-dashed border-amber-200 rounded-2xl p-5 transition hover:border-terracotta-400">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-xs font-bold uppercase tracking-wider text-terracotta-700 flex items-center gap-1">
+                      📝 Bloco de Notas da Jornada
+                    </span>
+                    <button
+                      onClick={() => setIsEditingNote(!isEditingNote)}
+                      className="text-xs font-semibold px-3 py-1 bg-white border border-journal-border rounded-lg text-journal-text hover:bg-journal-secondary transition"
+                    >
+                      {isEditingNote ? '✓ Concluir Edição' : '✏️ Editar Nota'}
+                    </button>
+                  </div>
+
+                  {isEditingNote ? (
+                    <textarea
+                      rows="5"
+                      value={noteText}
+                      onChange={e => setNoteText(e.target.value)}
+                      className="w-full p-3 bg-white border border-journal-border rounded-xl text-sm focus:outline-none focus:border-terracotta-500 font-sans leading-relaxed text-journal-text"
+                    />
+                  ) : (
+                    <div
+                      onClick={() => setIsEditingNote(true)}
+                      className="cursor-pointer leading-relaxed text-journal-text/90 italic p-2 rounded-lg hover:bg-amber-100/40 transition"
+                    >
+                      "{noteText}"
+                    </div>
+                  )}
+                </div>
 
                 <div className="grid md:grid-cols-2 gap-4 my-6">
                   <div className="p-5 bg-journal-bg rounded-2xl border border-journal-border">
