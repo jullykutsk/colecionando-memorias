@@ -19,6 +19,9 @@
   
   <!-- Babel para compilar JSX no navegador -->
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
 
   <script>
     tailwind.config = {
@@ -209,13 +212,9 @@
         return saved ? JSON.parse(saved) : INITIAL_MEETINGS;
       });
       const [selectedMeetingNum, setSelectedMeetingNum] = useState(1);
-
-      // Bloco de Notas para "Uma Jornada de Descobertas"
-      const [noteText, setNoteText] = useState(() => {
-        const saved = localStorage.getItem('guia_jornada_notes');
-        return saved !== null ? saved : 'Este é um convite para viver um tempo de descobertas, compartilhar experiências e fortalecer a amizade com tempo, carinho e liberdade. A ideia é sair um pouquinho da rotina, experimentar coisas novas e conhecer melhor os gostos, os sonhos e os jeitos de cada um.';
-      });
-      const [isEditingNote, setIsEditingNote] = useState(false);
+      
+      // Estado para controlar o modal da Jornada de Descobertas
+      const [showJourneyModal, setShowJourneyModal] = useState(false);
 
       useEffect(() => {
         localStorage.setItem('guia_ratings', JSON.stringify(ratings));
@@ -226,8 +225,10 @@
       }, [meetings]);
 
       useEffect(() => {
-        localStorage.setItem('guia_jornada_notes', noteText);
-      }, [noteText]);
+        if (window.lucide) {
+          window.lucide.createIcons();
+        }
+      });
 
       const handleRating = (itemKey, stars) => {
         setRatings(prev => ({
@@ -294,42 +295,23 @@
           <main>
             {activeTab === 'home' && (
               <div className="bg-white p-6 md:p-8 rounded-3xl border border-journal-border shadow-sm space-y-6">
-                <div className="border-l-4 border-terracotta-600 pl-4 py-1">
-                  <h2 className="font-serif text-2xl font-bold text-journal-text">
-                    Uma Jornada de Descobertas
-                  </h2>
-                  <p className="text-sm text-journal-text/60">Clique no bloco abaixo para editar ou anotar suas reflexões</p>
-                </div>
-
-                {/* Bloco de Notas Interativo */}
-                <div className="bg-amber-50/70 border-2 border-dashed border-amber-200 rounded-2xl p-5 transition hover:border-terracotta-400">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-xs font-bold uppercase tracking-wider text-terracotta-700 flex items-center gap-1">
-                      📝 Bloco de Notas da Jornada
-                    </span>
-                    <button
-                      onClick={() => setIsEditingNote(!isEditingNote)}
-                      className="text-xs font-semibold px-3 py-1 bg-white border border-journal-border rounded-lg text-journal-text hover:bg-journal-secondary transition"
-                    >
-                      {isEditingNote ? '✓ Concluir Edição' : '✏️ Editar Nota'}
-                    </button>
-                  </div>
-
-                  {isEditingNote ? (
-                    <textarea
-                      rows="5"
-                      value={noteText}
-                      onChange={e => setNoteText(e.target.value)}
-                      className="w-full p-3 bg-white border border-journal-border rounded-xl text-sm focus:outline-none focus:border-terracotta-500 font-sans leading-relaxed text-journal-text"
-                    />
-                  ) : (
-                    <div
-                      onClick={() => setIsEditingNote(true)}
-                      className="cursor-pointer leading-relaxed text-journal-text/90 italic p-2 rounded-lg hover:bg-amber-100/40 transition"
-                    >
-                      "{noteText}"
+                
+                {/* BOTÃO INTERATIVO: UMA JORNADA DE DESCOBERTAS */}
+                <div 
+                  onClick={() => setShowJourneyModal(true)}
+                  className="cursor-pointer bg-gradient-to-r from-terracotta-50 to-journal-secondary border-2 border-terracotta-200 p-6 rounded-3xl shadow-sm hover:border-terracotta-500 transition group"
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="text-xs font-semibold text-terracotta-600 uppercase tracking-widest">
+                        Toque para abrir a mensagem
+                      </span>
+                      <h2 className="font-serif text-2xl md:text-3xl font-bold text-journal-text group-hover:text-terracotta-700 transition">
+                        1. Uma Jornada de Descobertas ✨
+                      </h2>
                     </div>
-                  )}
+                    <span className="text-2xl text-terracotta-600 font-bold group-hover:translate-x-1 transition">→</span>
+                  </div>
                 </div>
 
                 <div className="grid md:grid-cols-2 gap-4 my-6">
@@ -365,6 +347,41 @@
                   >
                     Ir para o Formulário de Preferências →
                   </button>
+                </div>
+              </div>
+            )}
+
+            {/* MODAL DA MENSAGEM */}
+            {showJourneyModal && (
+              <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 animate-fadeIn">
+                <div className="bg-white max-w-lg w-full p-6 md:p-8 rounded-3xl border border-journal-border shadow-2xl relative space-y-4">
+                  <button 
+                    onClick={() => setShowJourneyModal(false)}
+                    className="absolute top-4 right-4 bg-journal-secondary text-journal-text w-8 h-8 rounded-full font-bold flex items-center justify-center hover:bg-terracotta-100 transition"
+                  >
+                    ✕
+                  </button>
+
+                  <span className="text-xs font-semibold text-terracotta-600 uppercase tracking-widest">
+                    Mensagem Especial
+                  </span>
+                  
+                  <h3 className="font-serif text-2xl md:text-3xl font-bold text-journal-text">
+                    Uma Jornada de Descobertas
+                  </h3>
+
+                  <p className="leading-relaxed text-journal-text/95 text-base md:text-lg bg-journal-bg p-5 rounded-2xl border border-journal-border">
+                    Este é um convite para viver um tempo de descobertas, compartilhar experiências e fortalecer a amizade com tempo, carinho e liberdade. A ideia é sair um pouquinho da rotina, experimentar coisas novas e conhecer melhor os gostos, os sonhos e os jeitos de cada um.
+                  </p>
+
+                  <div className="pt-2 text-center">
+                    <button
+                      onClick={() => setShowJourneyModal(false)}
+                      className="px-6 py-2.5 bg-terracotta-600 text-white font-medium rounded-xl hover:bg-terracotta-700 transition text-sm"
+                    >
+                      Fechar e Continuar
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
