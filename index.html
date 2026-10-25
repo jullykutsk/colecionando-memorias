@@ -32,22 +32,22 @@
             sans: ['Plus Jakarta Sans', 'sans-serif'],
           },
           colors: {
-            terracotta: {
-              50: '#fff7ed',
-              100: '#ffedd5',
-              200: '#fed7aa',
-              500: '#f97316',
-              600: '#ea580c',
-              700: '#c2410c',
-              800: '#9a3412',
+            // Nova paleta baseada na imagem enviada
+            palette: {
+              slate: '#5A6B7C',      // Cinza ardósia / azulado
+              silver: '#C4C7C9',     // Cinza claro / prata
+              offwhite: '#F4F5F6',   // Fundo claro suave
+              lightgreen: '#A4C68B', // Verde claro suave
+              olive: '#638C48',      // Verde médio / oliva
+              darkgreen: '#1B382B'   // Verde escuro floresta
             },
             journal: {
-              bg: '#FAF7F2',
+              bg: '#F4F5F6',
               card: '#FFFFFF',
-              border: '#E8E1D7',
-              text: '#3A332C',
-              accent: '#E07A5F',
-              secondary: '#F4F1DE'
+              border: '#C4C7C9',
+              text: '#1B382B',
+              accent: '#638C48',
+              secondary: '#E8ECEF'
             }
           }
         }
@@ -57,12 +57,12 @@
   
   <style>
     body {
-      background-color: #FAF7F2;
-      color: #3A332C;
+      background-color: #F4F5F6;
+      color: #1B382B;
       font-family: 'Plus Jakarta Sans', sans-serif;
     }
     .paper-texture {
-      background-image: radial-gradient(#d5ceca 0.75px, transparent 0.75px);
+      background-image: radial-gradient(#C4C7C9 0.75px, transparent 0.75px);
       background-size: 16px 16px;
     }
   </style>
@@ -212,8 +212,6 @@
         return saved ? JSON.parse(saved) : INITIAL_MEETINGS;
       });
       const [selectedMeetingNum, setSelectedMeetingNum] = useState(1);
-      
-      // Estado para controlar o modal da Jornada de Descobertas
       const [showJourneyModal, setShowJourneyModal] = useState(false);
 
       useEffect(() => {
@@ -248,22 +246,22 @@
 
       return (
         <div className="max-w-4xl mx-auto px-4 py-6">
-          <header className="text-center my-8 border-b border-journal-border pb-8">
-            <span className="inline-block px-3 py-1 bg-terracotta-100 text-terracotta-700 rounded-full text-xs font-semibold tracking-wider uppercase mb-3">
+          <header className="text-center my-8 border-b border-palette-silver pb-8">
+            <span className="inline-block px-3 py-1 bg-palette-lightgreen/30 text-palette-darkgreen rounded-full text-xs font-semibold tracking-wider uppercase mb-3">
               Guia de Amizade & Relacionamento
             </span>
-            <h1 className="font-serif text-4xl md:text-5xl text-journal-text font-bold mb-3">
+            <h1 className="font-serif text-4xl md:text-5xl text-palette-darkgreen font-bold mb-3">
               Nosso Guia de Encontros
             </h1>
 
-            <div className="mt-6 max-w-xs mx-auto bg-journal-secondary p-3 rounded-2xl border border-journal-border">
-              <div className="flex justify-between text-xs font-semibold text-journal-text mb-1">
+            <div className="mt-6 max-w-xs mx-auto bg-palette-secondary p-3 rounded-2xl border border-palette-silver">
+              <div className="flex justify-between text-xs font-semibold text-palette-darkgreen mb-1">
                 <span>Jornada dos 12 Encontros</span>
                 <span>{completedCount} de 12 concluídos</span>
               </div>
-              <div className="w-full bg-journal-border h-2.5 rounded-full overflow-hidden">
+              <div className="w-full bg-palette-silver h-2.5 rounded-full overflow-hidden">
                 <div 
-                  className="bg-terracotta-600 h-full transition-all duration-500 rounded-full"
+                  className="bg-palette-olive h-full transition-all duration-500 rounded-full"
                   style={{ width: `${(completedCount / 12) * 100}%` }}
                 ></div>
               </div>
@@ -283,8 +281,8 @@
                 onClick={() => setActiveTab(tab.id)}
                 className={`px-4 py-2.5 rounded-xl font-medium text-sm transition-all whitespace-nowrap ${
                   activeTab === tab.id
-                    ? 'bg-terracotta-600 text-white shadow-md'
-                    : 'bg-white/80 text-journal-text hover:bg-journal-secondary border border-journal-border'
+                    ? 'bg-palette-darkgreen text-white shadow-md'
+                    : 'bg-white text-palette-darkgreen hover:bg-palette-secondary border border-palette-silver'
                 }`}
               >
                 {tab.label}
@@ -294,56 +292,55 @@
 
           <main>
             {activeTab === 'home' && (
-              <div className="bg-white p-6 md:p-8 rounded-3xl border border-journal-border shadow-sm space-y-6">
+              <div className="bg-white p-6 md:p-8 rounded-3xl border border-palette-silver shadow-sm space-y-6">
                 
-                {/* BOTÃO INTERATIVO: UMA JORNADA DE DESCOBERTAS */}
                 <div 
                   onClick={() => setShowJourneyModal(true)}
-                  className="cursor-pointer bg-gradient-to-r from-terracotta-50 to-journal-secondary border-2 border-terracotta-200 p-6 rounded-3xl shadow-sm hover:border-terracotta-500 transition group"
+                  className="cursor-pointer bg-gradient-to-r from-palette-offwhite to-palette-secondary border-2 border-palette-olive/40 p-6 rounded-3xl shadow-sm hover:border-palette-olive transition group"
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <span className="text-xs font-semibold text-terracotta-600 uppercase tracking-widest">
+                      <span className="text-xs font-semibold text-palette-olive uppercase tracking-widest">
                         Toque para abrir a mensagem
                       </span>
-                      <h2 className="font-serif text-2xl md:text-3xl font-bold text-journal-text group-hover:text-terracotta-700 transition">
+                      <h2 className="font-serif text-2xl md:text-3xl font-bold text-palette-darkgreen group-hover:text-palette-olive transition">
                         1. Uma Jornada de Descobertas ✨
                       </h2>
                     </div>
-                    <span className="text-2xl text-terracotta-600 font-bold group-hover:translate-x-1 transition">→</span>
+                    <span className="text-2xl text-palette-olive font-bold group-hover:translate-x-1 transition">→</span>
                   </div>
                 </div>
 
                 <div className="grid md:grid-cols-2 gap-4 my-6">
-                  <div className="p-5 bg-journal-bg rounded-2xl border border-journal-border">
-                    <h3 className="font-semibold text-terracotta-700 text-lg mb-2">
+                  <div className="p-5 bg-palette-offwhite rounded-2xl border border-palette-silver">
+                    <h3 className="font-semibold text-palette-darkgreen text-lg mb-2">
                       1. Alternar a Responsabilidade
                     </h3>
-                    <p className="text-sm text-journal-text/80">
+                    <p className="text-sm text-palette-darkgreen/80">
                       Ao longo dos 12 encontros, cada um fica responsável por organizar a experiência. Quem organiza escolhe a atividade, pesquisa e cuida dos detalhes.
                     </p>
                   </div>
 
-                  <div className="p-5 bg-journal-bg rounded-2xl border border-journal-border">
-                    <h3 className="font-semibold text-terracotta-700 text-lg mb-2">
+                  <div className="p-5 bg-palette-offwhite rounded-2xl border border-palette-silver">
+                    <h3 className="font-semibold text-palette-darkgreen text-lg mb-2">
                       2. Respeitar o Ritmo
                     </h3>
-                    <p className="text-sm text-journal-text/80">
+                    <p className="text-sm text-palette-darkgreen/80">
                       Não se trata de cumprir uma lista ou fazer tudo dar certo. Não precisamos fazer grandes viagens ou gastar muito. O objetivo é criar oportunidades leves.
                     </p>
                   </div>
                 </div>
 
-                <div className="bg-terracotta-50 border border-terracotta-200 p-6 rounded-2xl text-center">
-                  <h3 className="font-serif font-bold text-xl text-terracotta-800 mb-2">
+                <div className="bg-palette-secondary border border-palette-silver p-6 rounded-2xl text-center">
+                  <h3 className="font-serif font-bold text-xl text-palette-darkgreen mb-2">
                     Prontos para começar?
                   </h3>
-                  <p className="text-sm text-terracotta-700 mb-4">
+                  <p className="text-sm text-palette-darkgreen/70 mb-4">
                     Primeiro passo: Preencham o Formulário de Preferências individualmente para descobrirem as afinidades!
                   </p>
                   <button
                     onClick={() => setActiveTab('form')}
-                    className="px-6 py-3 bg-terracotta-600 text-white font-medium rounded-xl hover:bg-terracotta-700 transition"
+                    className="px-6 py-3 bg-palette-darkgreen text-white font-medium rounded-xl hover:bg-palette-olive transition"
                   >
                     Ir para o Formulário de Preferências →
                   </button>
@@ -351,33 +348,32 @@
               </div>
             )}
 
-            {/* MODAL DA MENSAGEM */}
             {showJourneyModal && (
-              <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 animate-fadeIn">
-                <div className="bg-white max-w-lg w-full p-6 md:p-8 rounded-3xl border border-journal-border shadow-2xl relative space-y-4">
+              <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+                <div className="bg-white max-w-lg w-full p-6 md:p-8 rounded-3xl border border-palette-silver shadow-2xl relative space-y-4">
                   <button 
                     onClick={() => setShowJourneyModal(false)}
-                    className="absolute top-4 right-4 bg-journal-secondary text-journal-text w-8 h-8 rounded-full font-bold flex items-center justify-center hover:bg-terracotta-100 transition"
+                    className="absolute top-4 right-4 bg-palette-secondary text-palette-darkgreen w-8 h-8 rounded-full font-bold flex items-center justify-center hover:bg-palette-silver transition"
                   >
                     ✕
                   </button>
 
-                  <span className="text-xs font-semibold text-terracotta-600 uppercase tracking-widest">
+                  <span className="text-xs font-semibold text-palette-olive uppercase tracking-widest">
                     Mensagem Especial
                   </span>
                   
-                  <h3 className="font-serif text-2xl md:text-3xl font-bold text-journal-text">
+                  <h3 className="font-serif text-2xl md:text-3xl font-bold text-palette-darkgreen">
                     Uma Jornada de Descobertas
                   </h3>
 
-                  <p className="leading-relaxed text-journal-text/95 text-base md:text-lg bg-journal-bg p-5 rounded-2xl border border-journal-border">
+                  <p className="leading-relaxed text-palette-darkgreen/95 text-base md:text-lg bg-palette-offwhite p-5 rounded-2xl border border-palette-silver">
                     Este é um convite para viver um tempo de descobertas, compartilhar experiências e fortalecer a amizade com tempo, carinho e liberdade. A ideia é sair um pouquinho da rotina, experimentar coisas novas e conhecer melhor os gostos, os sonhos e os jeitos de cada um.
                   </p>
 
                   <div className="pt-2 text-center">
                     <button
                       onClick={() => setShowJourneyModal(false)}
-                      className="px-6 py-2.5 bg-terracotta-600 text-white font-medium rounded-xl hover:bg-terracotta-700 transition text-sm"
+                      className="px-6 py-2.5 bg-palette-darkgreen text-white font-medium rounded-xl hover:bg-palette-olive transition text-sm"
                     >
                       Fechar e Continuar
                     </button>
@@ -388,23 +384,23 @@
 
             {activeTab === 'form' && (
               <div className="space-y-6">
-                <div className="bg-white p-6 rounded-3xl border border-journal-border shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
+                <div className="bg-white p-6 rounded-3xl border border-palette-silver shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
                   <div>
-                    <h2 className="font-serif text-2xl font-bold text-journal-text">
+                    <h2 className="font-serif text-2xl font-bold text-palette-darkgreen">
                       Formulário de Preferências
                     </h2>
-                    <p className="text-sm text-journal-text/60">
+                    <p className="text-sm text-palette-darkgreen/60">
                       Avalie cada experiência de 1 a 5 estrelas.
                     </p>
                   </div>
 
-                  <div className="flex bg-journal-bg p-1.5 rounded-2xl border border-journal-border w-full md:w-auto justify-center">
+                  <div className="flex bg-palette-offwhite p-1.5 rounded-2xl border border-palette-silver w-full md:w-auto justify-center">
                     <button
                       onClick={() => setActivePerson('person1')}
                       className={`px-4 py-2 rounded-xl text-xs md:text-sm font-semibold transition ${
                         activePerson === 'person1'
-                          ? 'bg-terracotta-600 text-white shadow-sm'
-                          : 'text-journal-text/70 hover:text-journal-text'
+                          ? 'bg-palette-darkgreen text-white shadow-sm'
+                          : 'text-palette-darkgreen/70 hover:text-palette-darkgreen'
                       }`}
                     >
                       Pessoa 1
@@ -413,8 +409,8 @@
                       onClick={() => setActivePerson('person2')}
                       className={`px-4 py-2 rounded-xl text-xs md:text-sm font-semibold transition ${
                         activePerson === 'person2'
-                          ? 'bg-terracotta-600 text-white shadow-sm'
-                          : 'text-journal-text/70 hover:text-journal-text'
+                          ? 'bg-palette-darkgreen text-white shadow-sm'
+                          : 'text-palette-darkgreen/70 hover:text-palette-darkgreen'
                       }`}
                     >
                       Pessoa 2
@@ -424,8 +420,8 @@
 
                 <div className="space-y-6">
                   {CATEGORIES.map(cat => (
-                    <div key={cat.id} className="bg-white p-6 rounded-3xl border border-journal-border shadow-sm">
-                      <h3 className="font-serif font-bold text-xl text-terracotta-700 mb-4 pb-2 border-b border-journal-border">
+                    <div key={cat.id} className="bg-white p-6 rounded-3xl border border-palette-silver shadow-sm">
+                      <h3 className="font-serif font-bold text-xl text-palette-olive mb-4 pb-2 border-b border-palette-silver">
                         {cat.title}
                       </h3>
 
@@ -435,8 +431,8 @@
                           const currentStar = ratings[activePerson]?.[itemKey] || 0;
 
                           return (
-                            <div key={idx} className="p-4 bg-journal-bg rounded-2xl border border-journal-border/60 flex flex-col justify-between">
-                              <span className="font-medium text-sm text-journal-text mb-3">
+                            <div key={idx} className="p-4 bg-palette-offwhite rounded-2xl border border-palette-silver/60 flex flex-col justify-between">
+                              <span className="font-medium text-sm text-palette-darkgreen mb-3">
                                 {item}
                               </span>
 
@@ -452,7 +448,7 @@
                                     ★
                                   </button>
                                 ))}
-                                <span className="ml-2 text-xs text-journal-text/50">
+                                <span className="ml-2 text-xs text-palette-darkgreen/50">
                                   {currentStar > 0 ? `${currentStar}/5` : 'Não avaliado'}
                                 </span>
                               </div>
@@ -464,11 +460,11 @@
                   ))}
                 </div>
 
-                <div className="bg-white p-6 rounded-3xl border border-journal-border shadow-sm">
-                  <h3 className="font-serif font-bold text-2xl text-journal-text mb-2">
+                <div className="bg-white p-6 rounded-3xl border border-palette-silver shadow-sm">
+                  <h3 className="font-serif font-bold text-2xl text-palette-darkgreen mb-2">
                     Afinidades Encontradas (Coincidências)
                   </h3>
-                  <p className="text-sm text-journal-text/60 mb-6">
+                  <p className="text-sm text-palette-darkgreen/60 mb-6">
                     Experiências que ambos avaliaram com nota alta (4 ou 5 estrelas):
                   </p>
 
@@ -488,16 +484,16 @@
 
                       if (matches.length === 0) {
                         return (
-                          <div className="text-center py-8 text-journal-text/50 italic bg-journal-bg rounded-2xl border border-dashed border-journal-border">
+                          <div className="text-center py-8 text-palette-darkgreen/50 italic bg-palette-offwhite rounded-2xl border border-dashed border-palette-silver">
                             Preencham os formulários como Pessoa 1 e Pessoa 2 com notas 4 ou 5 para verem as afinidades em comum aqui!
                           </div>
                         );
                       }
 
                       return matches.map((m, i) => (
-                        <div key={i} className="p-4 bg-terracotta-50 border border-terracotta-200 rounded-2xl flex items-center justify-between">
-                          <span className="font-semibold text-terracotta-800">{m.item}</span>
-                          <span className="text-xs bg-terracotta-200 text-terracotta-800 px-3 py-1 rounded-full font-medium">
+                        <div key={i} className="p-4 bg-palette-offwhite border border-palette-silver rounded-2xl flex items-center justify-between">
+                          <span className="font-semibold text-palette-darkgreen">{m.item}</span>
+                          <span className="text-xs bg-palette-lightgreen/40 text-palette-darkgreen px-3 py-1 rounded-full font-medium">
                             {m.category.split('.')[1]}
                           </span>
                         </div>
@@ -509,26 +505,26 @@
             )}
 
             {activeTab === 'ideas' && (
-              <div className="bg-white p-6 md:p-8 rounded-3xl border border-journal-border shadow-sm space-y-6">
+              <div className="bg-white p-6 md:p-8 rounded-3xl border border-palette-silver shadow-sm space-y-6">
                 <div>
-                  <h2 className="font-serif text-2xl font-bold text-journal-text">
+                  <h2 className="font-serif text-2xl font-bold text-palette-darkgreen">
                     Banco de Ideias para Inspirar
                   </h2>
-                  <p className="text-sm text-journal-text/60">
+                  <p className="text-sm text-palette-darkgreen/60">
                     Use estas sugestões diretamente no planejamento do seu próximo encontro.
                   </p>
                 </div>
 
                 <div className="grid md:grid-cols-2 gap-6">
                   {CATEGORIES.map(cat => (
-                    <div key={cat.id} className="p-5 bg-journal-bg rounded-2xl border border-journal-border">
-                      <h3 className="font-serif font-bold text-lg text-terracotta-700 mb-3 pb-2 border-b border-journal-border">
+                    <div key={cat.id} className="p-5 bg-palette-offwhite rounded-2xl border border-palette-silver">
+                      <h3 className="font-serif font-bold text-lg text-palette-olive mb-3 pb-2 border-b border-palette-silver">
                         {cat.title}
                       </h3>
                       <ul className="space-y-2">
                         {cat.items.map((item, idx) => (
-                          <li key={idx} className="text-sm text-journal-text/80 flex items-start gap-2">
-                            <span className="text-terracotta-500 font-bold">•</span>
+                          <li key={idx} className="text-sm text-palette-darkgreen/80 flex items-start gap-2">
+                            <span className="text-palette-olive font-bold">•</span>
                             <span>{item}</span>
                           </li>
                         ))}
@@ -541,11 +537,11 @@
 
             {activeTab === 'meetings' && (
               <div className="space-y-6">
-                <div className="bg-white p-6 rounded-3xl border border-journal-border shadow-sm">
-                  <h2 className="font-serif text-2xl font-bold text-journal-text mb-2">
+                <div className="bg-white p-6 rounded-3xl border border-palette-silver shadow-sm">
+                  <h2 className="font-serif text-2xl font-bold text-palette-darkgreen mb-2">
                     Fichas dos 12 Encontros
                   </h2>
-                  <p className="text-sm text-journal-text/60 mb-6">
+                  <p className="text-sm text-palette-darkgreen/60 mb-6">
                     Selecione o número do encontro para planejar os detalhes ou registrar como foi.
                   </p>
 
@@ -556,10 +552,10 @@
                         onClick={() => setSelectedMeetingNum(m.number)}
                         className={`p-3 rounded-2xl border font-serif text-center transition flex flex-col items-center justify-center ${
                           selectedMeetingNum === m.number
-                            ? 'bg-terracotta-600 text-white border-terracotta-600 shadow-md scale-105'
+                            ? 'bg-palette-darkgreen text-white border-palette-darkgreen shadow-md scale-105'
                             : m.status === 'completed'
                             ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
-                            : 'bg-journal-bg text-journal-text border-journal-border hover:bg-journal-secondary'
+                            : 'bg-palette-offwhite text-palette-darkgreen border-palette-silver hover:bg-palette-secondary'
                         }`}
                       >
                         <span className="text-xs uppercase font-sans tracking-widest opacity-80">
@@ -583,13 +579,13 @@
                   if (!currentMeeting) return null;
 
                   return (
-                    <div className="bg-white p-6 md:p-8 rounded-3xl border border-journal-border shadow-sm space-y-6">
-                      <div className="flex justify-between items-center pb-4 border-b border-journal-border">
+                    <div className="bg-white p-6 md:p-8 rounded-3xl border border-palette-silver shadow-sm space-y-6">
+                      <div className="flex justify-between items-center pb-4 border-b border-palette-silver">
                         <div>
-                          <span className="text-xs font-semibold text-terracotta-600 uppercase tracking-widest">
+                          <span className="text-xs font-semibold text-palette-olive uppercase tracking-widest">
                             Ficha de Planejamento
                           </span>
-                          <h3 className="font-serif text-3xl font-bold text-journal-text">
+                          <h3 className="font-serif text-3xl font-bold text-palette-darkgreen">
                             Encontro nº {String(currentMeeting.number).padStart(2, '0')}
                           </h3>
                         </div>
@@ -602,7 +598,7 @@
                           className={`px-4 py-2 rounded-xl text-xs font-bold transition ${
                             currentMeeting.status === 'completed'
                               ? 'bg-emerald-600 text-white'
-                              : 'bg-journal-secondary text-journal-text border border-journal-border'
+                              : 'bg-palette-secondary text-palette-darkgreen border border-palette-silver'
                           }`}
                         >
                           {currentMeeting.status === 'completed' ? '✓ Concluído' : 'Marcar Feito'}
@@ -611,7 +607,7 @@
 
                       <div className="grid md:grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-xs font-semibold text-journal-text/70 mb-1">
+                          <label className="block text-xs font-semibold text-palette-darkgreen/70 mb-1">
                             Nome da Experiência / Atividade
                           </label>
                           <input
@@ -619,18 +615,18 @@
                             value={currentMeeting.title}
                             onChange={e => handleMeetingUpdate({ ...currentMeeting, title: e.target.value })}
                             placeholder="Ex: Tarde de Cerâmica & Café"
-                            className="w-full p-3 bg-journal-bg border border-journal-border rounded-xl text-sm focus:outline-none focus:border-terracotta-500"
+                            className="w-full p-3 bg-palette-offwhite border border-palette-silver rounded-xl text-sm focus:outline-none focus:border-palette-olive"
                           />
                         </div>
 
                         <div>
-                          <label className="block text-xs font-semibold text-journal-text/70 mb-1">
+                          <label className="block text-xs font-semibold text-palette-darkgreen/70 mb-1">
                             Responsável pela Organização
                           </label>
                           <select
                             value={currentMeeting.organizer}
                             onChange={e => handleMeetingUpdate({ ...currentMeeting, organizer: e.target.value })}
-                            className="w-full p-3 bg-journal-bg border border-journal-border rounded-xl text-sm focus:outline-none focus:border-terracotta-500"
+                            className="w-full p-3 bg-palette-offwhite border border-palette-silver rounded-xl text-sm focus:outline-none focus:border-palette-olive"
                           >
                             <option value="Pessoa 1">Pessoa 1</option>
                             <option value="Pessoa 2">Pessoa 2</option>
@@ -638,19 +634,19 @@
                         </div>
 
                         <div>
-                          <label className="block text-xs font-semibold text-journal-text/70 mb-1">
+                          <label className="block text-xs font-semibold text-palette-darkgreen/70 mb-1">
                             Data Prevista
                           </label>
                           <input
                             type="date"
                             value={currentMeeting.date}
                             onChange={e => handleMeetingUpdate({ ...currentMeeting, date: e.target.value })}
-                            className="w-full p-3 bg-journal-bg border border-journal-border rounded-xl text-sm focus:outline-none focus:border-terracotta-500"
+                            className="w-full p-3 bg-palette-offwhite border border-palette-silver rounded-xl text-sm focus:outline-none focus:border-palette-olive"
                           />
                         </div>
 
                         <div>
-                          <label className="block text-xs font-semibold text-journal-text/70 mb-1">
+                          <label className="block text-xs font-semibold text-palette-darkgreen/70 mb-1">
                             Local e Endereço
                           </label>
                           <input
@@ -658,37 +654,37 @@
                             value={currentMeeting.location}
                             onChange={e => handleMeetingUpdate({ ...currentMeeting, location: e.target.value })}
                             placeholder="Ex: Parque Central ou Ateliê X"
-                            className="w-full p-3 bg-journal-bg border border-journal-border rounded-xl text-sm focus:outline-none focus:border-terracotta-500"
+                            className="w-full p-3 bg-palette-offwhite border border-palette-silver rounded-xl text-sm focus:outline-none focus:border-palette-olive"
                           />
                         </div>
 
                         <div>
-                          <label className="block text-xs font-semibold text-journal-text/70 mb-1">
+                          <label className="block text-xs font-semibold text-palette-darkgreen/70 mb-1">
                             Horário de Saída
                           </label>
                           <input
                             type="time"
                             value={currentMeeting.timeDeparture}
                             onChange={e => handleMeetingUpdate({ ...currentMeeting, timeDeparture: e.target.value })}
-                            className="w-full p-3 bg-journal-bg border border-journal-border rounded-xl text-sm focus:outline-none focus:border-terracotta-500"
+                            className="w-full p-3 bg-palette-offwhite border border-palette-silver rounded-xl text-sm focus:outline-none focus:border-palette-olive"
                           />
                         </div>
 
                         <div>
-                          <label className="block text-xs font-semibold text-journal-text/70 mb-1">
+                          <label className="block text-xs font-semibold text-palette-darkgreen/70 mb-1">
                             Retorno Previsto
                           </label>
                           <input
                             type="time"
                             value={currentMeeting.timeReturn}
                             onChange={e => handleMeetingUpdate({ ...currentMeeting, timeReturn: e.target.value })}
-                            className="w-full p-3 bg-journal-bg border border-journal-border rounded-xl text-sm focus:outline-none focus:border-terracotta-500"
+                            className="w-full p-3 bg-palette-offwhite border border-palette-silver rounded-xl text-sm focus:outline-none focus:border-palette-olive"
                           />
                         </div>
                       </div>
 
                       <div>
-                        <label className="block text-xs font-semibold text-journal-text/70 mb-1">
+                        <label className="block text-xs font-semibold text-palette-darkgreen/70 mb-1">
                           Pista ou Spoiler do Encontro
                         </label>
                         <textarea
@@ -696,7 +692,7 @@
                           value={currentMeeting.spoiler}
                           onChange={e => handleMeetingUpdate({ ...currentMeeting, spoiler: e.target.value })}
                           placeholder="Ex: Traga roupas confortáveis..."
-                          className="w-full p-3 bg-journal-bg border border-journal-border rounded-xl text-sm focus:outline-none focus:border-terracotta-500"
+                          className="w-full p-3 bg-palette-offwhite border border-palette-silver rounded-xl text-sm focus:outline-none focus:border-palette-olive"
                         ></textarea>
                       </div>
                     </div>
@@ -707,11 +703,11 @@
 
             {activeTab === 'memories' && (
               <div className="space-y-6">
-                <div className="bg-white p-6 rounded-3xl border border-journal-border shadow-sm">
-                  <h2 className="font-serif text-2xl font-bold text-journal-text mb-2">
+                <div className="bg-white p-6 rounded-3xl border border-palette-silver shadow-sm">
+                  <h2 className="font-serif text-2xl font-bold text-palette-darkgreen mb-2">
                     Registro das Memórias
                   </h2>
-                  <p className="text-sm text-journal-text/60 mb-6">
+                  <p className="text-sm text-palette-darkgreen/60 mb-6">
                     Guarde fotos, recordações e palavras especiais vividas em cada encontro.
                   </p>
 
@@ -722,8 +718,8 @@
                         onClick={() => setSelectedMeetingNum(m.number)}
                         className={`px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition ${
                           selectedMeetingNum === m.number
-                            ? 'bg-terracotta-600 text-white'
-                            : 'bg-journal-bg text-journal-text border border-journal-border hover:bg-journal-secondary'
+                            ? 'bg-palette-darkgreen text-white'
+                            : 'bg-palette-offwhite text-palette-darkgreen border border-palette-silver hover:bg-palette-secondary'
                         }`}
                       >
                         Encontro {String(m.number).padStart(2, '0')}
@@ -757,19 +753,19 @@
                   };
 
                   return (
-                    <div className="bg-white p-6 md:p-8 rounded-3xl border border-journal-border shadow-sm space-y-6">
-                      <div className="border-b border-journal-border pb-4">
-                        <span className="text-xs font-semibold text-terracotta-600 uppercase tracking-widest">
+                    <div className="bg-white p-6 md:p-8 rounded-3xl border border-palette-silver shadow-sm space-y-6">
+                      <div className="border-b border-palette-silver pb-4">
+                        <span className="text-xs font-semibold text-palette-olive uppercase tracking-widest">
                           Diário do Encontro
                         </span>
-                        <h3 className="font-serif text-3xl font-bold text-journal-text">
+                        <h3 className="font-serif text-3xl font-bold text-palette-darkgreen">
                           {currentMeeting.title || `Encontro ${currentMeeting.number}`}
                         </h3>
                       </div>
 
                       <div className="grid md:grid-cols-2 gap-6">
                         <div className="flex flex-col items-center">
-                          <div className="w-full bg-journal-bg p-4 rounded-2xl border border-journal-border shadow-inner text-center">
+                          <div className="w-full bg-palette-offwhite p-4 rounded-2xl border border-palette-silver shadow-inner text-center">
                             {memory.photo ? (
                               <div className="relative group">
                                 <img
@@ -785,10 +781,10 @@
                                 </button>
                               </div>
                             ) : (
-                              <div className="h-64 border-2 border-dashed border-journal-border rounded-xl flex flex-col items-center justify-center p-6 text-journal-text/40">
+                              <div className="h-64 border-2 border-dashed border-palette-silver rounded-xl flex flex-col items-center justify-center p-6 text-palette-darkgreen/40">
                                 <span className="text-4xl mb-2">📷</span>
                                 <p className="text-xs mb-4">Adicione uma foto, ingresso ou recordação</p>
-                                <label className="cursor-pointer px-4 py-2 bg-terracotta-600 text-white rounded-xl text-xs font-semibold hover:bg-terracotta-700 transition">
+                                <label className="cursor-pointer px-4 py-2 bg-palette-darkgreen text-white rounded-xl text-xs font-semibold hover:bg-palette-olive transition">
                                   Carregar Foto
                                   <input type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
                                 </label>
@@ -799,7 +795,7 @@
 
                         <div className="space-y-4">
                           <div>
-                            <label className="block text-xs font-semibold text-journal-text/70 mb-1">
+                            <label className="block text-xs font-semibold text-palette-darkgreen/70 mb-1">
                               Uma palavra para definir esse encontro:
                             </label>
                             <input
@@ -807,43 +803,43 @@
                               value={memory.word || ''}
                               onChange={e => updateMemory('word', e.target.value)}
                               placeholder="Ex: Mágico, Inesquecível..."
-                              className="w-full p-3 bg-journal-bg border border-journal-border rounded-xl text-sm focus:outline-none focus:border-terracotta-500 font-serif font-bold text-terracotta-700"
+                              className="w-full p-3 bg-palette-offwhite border border-palette-silver rounded-xl text-sm focus:outline-none focus:border-palette-olive font-serif font-bold text-palette-olive"
                             />
                           </div>
 
                           <div>
-                            <label className="block text-xs font-semibold text-journal-text/70 mb-1">
+                            <label className="block text-xs font-semibold text-palette-darkgreen/70 mb-1">
                               O que mais gostei ou me surpreendeu:
                             </label>
                             <textarea
                               rows="2"
                               value={memory.likedMost || ''}
                               onChange={e => updateMemory('likedMost', e.target.value)}
-                              className="w-full p-3 bg-journal-bg border border-journal-border rounded-xl text-sm focus:outline-none focus:border-terracotta-500"
+                              className="w-full p-3 bg-palette-offwhite border border-palette-silver rounded-xl text-sm focus:outline-none focus:border-palette-olive"
                             ></textarea>
                           </div>
 
                           <div>
-                            <label className="block text-xs font-semibold text-journal-text/70 mb-1">
+                            <label className="block text-xs font-semibold text-palette-darkgreen/70 mb-1">
                               Um momento que quero guardar na memória:
                             </label>
                             <textarea
                               rows="2"
                               value={memory.momentToKeep || ''}
                               onChange={e => updateMemory('momentToKeep', e.target.value)}
-                              className="w-full p-3 bg-journal-bg border border-journal-border rounded-xl text-sm focus:outline-none focus:border-terracotta-500"
+                              className="w-full p-3 bg-palette-offwhite border border-palette-silver rounded-xl text-sm focus:outline-none focus:border-palette-olive"
                             ></textarea>
                           </div>
 
                           <div>
-                            <label className="block text-xs font-semibold text-journal-text/70 mb-1">
+                            <label className="block text-xs font-semibold text-palette-darkgreen/70 mb-1">
                               Uma ideia para o próximo encontro:
                             </label>
                             <input
                               type="text"
                               value={memory.nextIdea || ''}
                               onChange={e => updateMemory('nextIdea', e.target.value)}
-                              className="w-full p-3 bg-journal-bg border border-journal-border rounded-xl text-sm focus:outline-none focus:border-terracotta-500"
+                              className="w-full p-3 bg-palette-offwhite border border-palette-silver rounded-xl text-sm focus:outline-none focus:border-palette-olive"
                             />
                           </div>
                         </div>
