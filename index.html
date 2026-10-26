@@ -209,28 +209,35 @@
 
       const [openCategories, setOpenCategories] = useState({});
 
-      // Estados da Roleta Interativa
-      const [rouletteResult, setRouletteResult] = useState(null);
+      // Estados da Roleta Giratória com física de rotação
+      const [rouletteWinner, setRouletteWinner] = useState(null);
       const [isSpinning, setIsSpinning] = useState(false);
+      const [rotationDegree, setRotationDegree] = useState(0);
 
       const spinRoulette = () => {
         if (isSpinning) return;
         setIsSpinning(true);
-        setRouletteResult(null);
+        setRouletteWinner(null);
 
-        let counter = 0;
-        const options = ['Pessoa 1', 'Pessoa 2'];
-        const interval = setInterval(() => {
-          setRouletteResult(options[counter % 2]);
-          counter++;
-        }, 100);
+        // Sorteia o vencedor de forma aleatória
+        const winner = Math.random() < 0.5 ? 'Pessoa 1' : 'Pessoa 2';
+        
+        // Quantas voltas completas queremos dar (ex: 5 voltas = 1800 graus)
+        const extraSpins = 360 * 5; 
+        
+        // Pessoa 1 fica no topo (0° / 360°), Pessoa 2 fica em baixo (180°)
+        const targetAngle = winner === 'Pessoa 1' ? 0 : 180;
+        
+        // Adiciona a rotação atual + voltas extras + ângulo exato do vencedor
+        const currentMod = rotationDegree % 360;
+        const totalRotation = rotationDegree + extraSpins + (targetAngle - currentMod + 360) % 360;
+
+        setRotationDegree(totalRotation);
 
         setTimeout(() => {
-          clearInterval(interval);
-          const finalWinner = Math.random() < 0.5 ? 'Pessoa 1' : 'Pessoa 2';
-          setRouletteResult(finalWinner);
+          setRouletteWinner(winner);
           setIsSpinning(false);
-        }, 1500);
+        }, 3000); // O tempo da animação CSS (3 segundos)
       };
 
       const toggleCategory = (catId) => {
@@ -337,7 +344,7 @@
                   </div>
                 </div>
 
-                {/* ROLETA INTERATIVA */}
+                {/* ROLETA INTERATIVA GIRATÓRIA */}
                 <div className="bg-gradient-to-r from-palette-secondary to-white p-6 rounded-3xl border-2 border-palette-border text-center space-y-4 shadow-sm">
                   <span className="text-xs font-semibold text-palette-primary uppercase tracking-widest">
                     Brincadeira da Sorte
@@ -346,13 +353,36 @@
                     Quem começa a organizar o 1º encontro? 🎡
                   </h3>
                   
-                  <div className="py-4">
-                    <div className={`inline-block px-8 py-4 rounded-2xl text-xl font-bold border transition-all shadow-sm ${
-                      rouletteResult ? 'bg-palette-primary text-white border-palette-primary scale-105' : 'bg-white text-palette-dark border-palette-border'
-                    }`}>
-                      {isSpinning ? 'Girando a roleta...' : (rouletteResult ? `✨ ${rouletteResult} começa! ✨` : 'Clique abaixo para sortear')}
+                  <div className="flex flex-col items-center justify-center py-4">
+                    {/* Indicador / Seta da Roleta */}
+                    <div className="w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-b-[16px] border-b-palette-primary mb-[-6px] z-10"></div>
+                    
+                    {/* Círculo da Roleta */}
+                    <div 
+                      className="w-48 h-48 rounded-full border-4 border-palette-primary shadow-lg relative overflow-hidden flex items-center justify-center bg-white"
+                      style={{
+                        transform: `rotate(${rotationDegree}deg)`,
+                        transition: isSpinning ? 'transform 3s cubic-bezier(0.15, 0.85, 0.15, 1)' : 'none'
+                      }}
+                    >
+                      {/* Metade Pessoa 1 */}
+                      <div className="absolute top-0 left-0 w-full h-1/2 bg-[#F5EEF0] border-b border-palette-border flex items-center justify-center pt-2">
+                        <span className="font-serif font-bold text-palette-dark text-base">Pessoa 1</span>
+                      </div>
+                      {/* Metade Pessoa 2 */}
+                      <div className="absolute bottom-0 left-0 w-full h-1/2 bg-[#D35400] flex items-center justify-center pb-2">
+                        <span className="font-serif font-bold text-white text-base">Pessoa 2</span>
+                      </div>
+                      {/* Centro da Roleta */}
+                      <div className="absolute w-6 h-6 bg-palette-dark rounded-full border-2 border-white shadow"></div>
                     </div>
                   </div>
+
+                  {rouletteWinner && !isSpinning && (
+                    <div className="p-3 bg-palette-primary text-white rounded-xl font-bold text-lg animate-bounce shadow-md inline-block px-6">
+                      ✨ {rouletteWinner} começa! ✨
+                    </div>
+                  )}
 
                   <div>
                     <button
@@ -360,7 +390,7 @@
                       disabled={isSpinning}
                       className="px-6 py-3 bg-palette-primary text-white font-medium rounded-xl hover:bg-palette-accent transition disabled:opacity-50 text-sm shadow-md"
                     >
-                      {isSpinning ? 'Sorteando...' : 'Girar Roleta! 🎲'}
+                      {isSpinning ? 'A girar a roleta...' : 'Girar Roleta! 🎲'}
                     </button>
                   </div>
                 </div>
