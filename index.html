@@ -206,6 +206,16 @@
       const [selectedMeetingNum, setSelectedMeetingNum] = useState(1);
       const [showJourneyModal, setShowJourneyModal] = useState(false);
 
+      // Controle de cartões abertos (por padrão iniciam fechados para uma navegação limpa)
+      const [openCategories, setOpenCategories] = useState({});
+
+      const toggleCategory = (catId) => {
+        setOpenCategories(prev => ({
+          ...prev,
+          [catId]: !prev[catId]
+        }));
+      };
+
       useEffect(() => {
         localStorage.setItem('guia_ratings', JSON.stringify(ratings));
       }, [ratings]);
@@ -370,7 +380,7 @@
                       Formulário de Preferências
                     </h2>
                     <p className="text-sm text-palette-dark/60">
-                      Avalie cada experiência de 1 a 5 estrelas.
+                      Toque no cartão para expandir as opções e avaliar cada item com estrelas.
                     </p>
                   </div>
 
@@ -398,46 +408,74 @@
                   </div>
                 </div>
 
-                <div className="space-y-6">
-                  {CATEGORIES.map(cat => (
-                    <div key={cat.id} className="bg-white p-6 rounded-3xl border border-palette-border shadow-sm">
-                      <h3 className="font-serif font-bold text-xl text-palette-primary mb-4 pb-2 border-b border-palette-border">
-                        {cat.title}
-                      </h3>
+                {/* CARTÕES EXPANSÍVEIS DO FORMULÁRIO */}
+                <div className="space-y-4">
+                  {CATEGORIES.map(cat => {
+                    const isOpen = !!openCategories[cat.id];
+                    
+                    // Conta quantos itens já foram avaliados nesta categoria
+                    const ratedCount = cat.items.filter((_, idx) => {
+                      const itemKey = `${cat.id}_${idx}`;
+                      return (ratings[activePerson]?.[itemKey] || 0) > 0;
+                    }).length;
 
-                      <div className="grid md:grid-cols-2 gap-4">
-                        {cat.items.map((item, idx) => {
-                          const itemKey = `${cat.id}_${idx}`;
-                          const currentStar = ratings[activePerson]?.[itemKey] || 0;
-
-                          return (
-                            <div key={idx} className="p-4 bg-palette-secondary/40 rounded-2xl border border-palette-border flex flex-col justify-between">
-                              <span className="font-medium text-sm text-palette-dark mb-3">
-                                {item}
+                    return (
+                      <div key={cat.id} className="bg-white rounded-3xl border border-palette-border shadow-sm overflow-hidden transition-all">
+                        <button
+                          onClick={() => toggleCategory(cat.id)}
+                          className="w-full p-5 bg-palette-secondary/30 hover:bg-palette-secondary/60 flex items-center justify-between text-left transition"
+                        >
+                          <div className="flex items-center gap-3">
+                            <h3 className="font-serif font-bold text-lg md:text-xl text-palette-primary">
+                              {cat.title}
+                            </h3>
+                            {ratedCount > 0 && (
+                              <span className="text-xs bg-palette-primary/10 text-palette-primary px-2.5 py-1 rounded-full font-semibold">
+                                {ratedCount}/{cat.items.length} avaliados
                               </span>
+                            )}
+                          </div>
+                          <span className="text-palette-primary font-bold text-2xl transition-transform duration-300">
+                            {isOpen ? '−' : '+'}
+                          </span>
+                        </button>
 
-                              <div className="flex items-center gap-1">
-                                {[1, 2, 3, 4, 5].map(star => (
-                                  <button
-                                    key={star}
-                                    onClick={() => handleRating(itemKey, star)}
-                                    className={`text-2xl transition-transform hover:scale-125 ${
-                                      star <= currentStar ? 'text-amber-500' : 'text-gray-300'
-                                    }`}
-                                  >
-                                    ★
-                                  </button>
-                                ))}
-                                <span className="ml-2 text-xs text-palette-dark/50">
-                                  {currentStar > 0 ? `${currentStar}/5` : 'Não avaliado'}
-                                </span>
-                              </div>
-                            </div>
-                          );
-                        })}
+                        {isOpen && (
+                          <div className="p-6 grid md:grid-cols-2 gap-4 border-t border-palette-border bg-white">
+                            {cat.items.map((item, idx) => {
+                              const itemKey = `${cat.id}_${idx}`;
+                              const currentStar = ratings[activePerson]?.[itemKey] || 0;
+
+                              return (
+                                <div key={idx} className="p-4 bg-palette-secondary/30 rounded-2xl border border-palette-border/60 flex flex-col justify-between">
+                                  <span className="font-medium text-sm text-palette-dark mb-3">
+                                    {item}
+                                  </span>
+
+                                  <div className="flex items-center gap-1">
+                                    {[1, 2, 3, 4, 5].map(star => (
+                                      <button
+                                        key={star}
+                                        onClick={() => handleRating(itemKey, star)}
+                                        className={`text-2xl transition-transform hover:scale-125 ${
+                                          star <= currentStar ? 'text-amber-500' : 'text-gray-300'
+                                        }`}
+                                      >
+                                        ★
+                                      </button>
+                                    ))}
+                                    <span className="ml-2 text-xs text-palette-dark/50">
+                                      {currentStar > 0 ? `${currentStar}/5` : 'Não avaliado'}
+                                    </span>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
 
                 <div className="bg-white p-6 rounded-3xl border border-palette-border shadow-sm">
