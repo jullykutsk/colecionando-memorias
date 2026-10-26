@@ -200,12 +200,6 @@
         return saved ? JSON.parse(saved) : { person1: {}, person2: {} };
       });
 
-      // Estado para controlar se cada pessoa finalizou o preenchimento
-      const [statusSubmission, setStatusSubmission] = useState(() => {
-        const saved = localStorage.getItem('guia_submission_status');
-        return saved ? JSON.parse(saved) : { person1: false, person2: false };
-      });
-
       const [activePerson, setActivePerson] = useState('person1');
       const [meetings, setMeetings] = useState(() => {
         const saved = localStorage.getItem('guia_meetings');
@@ -228,10 +222,6 @@
       }, [ratings]);
 
       useEffect(() => {
-        localStorage.setItem('guia_submission_status', JSON.stringify(statusSubmission));
-      }, [statusSubmission]);
-
-      useEffect(() => {
         localStorage.setItem('guia_meetings', JSON.stringify(meetings));
       }, [meetings]);
 
@@ -242,9 +232,6 @@
       });
 
       const handleRating = (itemKey, stars) => {
-        // Se a pessoa já finalizou e travou, não deixa alterar a menos que reabra
-        if (statusSubmission[activePerson]) return;
-
         setRatings(prev => ({
           ...prev,
           [activePerson]: {
@@ -254,25 +241,11 @@
         }));
       };
 
-      const handleFinishSubmission = (person) => {
-        setStatusSubmission(prev => ({ ...prev, [person]: true }));
-      };
-
-      const handleUnlockSubmission = (person) => {
-        const pin = prompt(`Digite a senha/PIN para desbloquear o formulário da ${person === 'person1' ? 'Pessoa 1' : 'Pessoa 2'}:`);
-        if (pin === '1234') { // Senha padrão simples, pode alterar se quiser
-          setStatusSubmission(prev => ({ ...prev, [person]: false }));
-        } else if (pin !== null) {
-          alert('Senha incorreta!');
-        }
-      };
-
       const handleMeetingUpdate = (updatedMeeting) => {
         setMeetings(prev => prev.map(m => m.number === updatedMeeting.number ? updatedMeeting : m));
       };
 
       const completedCount = meetings.filter(m => m.status === 'completed').length;
-      const bothCompleted = statusSubmission.person1 && statusSubmission.person2;
 
       return (
         <div className="max-w-4xl mx-auto px-4 py-6">
@@ -354,7 +327,7 @@
                     Prontos para começar?
                   </h3>
                   <p className="text-sm text-palette-dark/70 mb-4">
-                    Primeiro passo: Preencham o Formulário de Preferências individualmente. As afinidades só serão reveladas quando ambos finalizarem!
+                    Primeiro passo: Preencham o Formulário de Preferências individualmente para descobrirem as afinidades!
                   </p>
                   <button
                     onClick={() => setActiveTab('form')}
@@ -408,7 +381,7 @@
                       Formulário de Preferências
                     </h2>
                     <p className="text-sm text-palette-dark/60">
-                      Preencha suas notas em segredo. As coincidências só aparecem quando ambos finalizarem.
+                      Avalie as atividades em cada categoria para ver as coincidências na tabela abaixo.
                     </p>
                   </div>
 
@@ -421,7 +394,7 @@
                           : 'text-palette-dark/70 hover:text-palette-dark'
                       }`}
                     >
-                      Pessoa 1 {statusSubmission.person1 ? '🔒' : '✏️'}
+                      Pessoa 1 ✏️
                     </button>
                     <button
                       onClick={() => setActivePerson('person2')}
@@ -431,41 +404,18 @@
                           : 'text-palette-dark/70 hover:text-palette-dark'
                       }`}
                     >
-                      Pessoa 2 {statusSubmission.person2 ? '🔒' : '✏️'}
+                      Pessoa 2 ✏️
                     </button>
                   </div>
                 </div>
 
-                {/* BOTÃO DE STATUS E TRAVAMENTO DA PESSOA ATUAL */}
-                <div className="bg-white p-5 rounded-3xl border border-palette-border shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
-                  <div>
-                    <span className="text-xs font-semibold uppercase tracking-wider text-palette-primary">
-                      Perfil Ativo: {activePerson === 'person1' ? 'Pessoa 1' : 'Pessoa 2'}
-                    </span>
-                    <p className="text-sm font-bold text-palette-dark">
-                      {statusSubmission[activePerson] 
-                        ? 'Status: Formulário finalizado e bloqueado com sucesso! ✔️' 
-                        : 'Status: Em preenchimento livre. Clique em "Finalizar Meu Preenchimento" quando terminar.'}
-                    </p>
-                  </div>
-
-                  <div>
-                    {statusSubmission[activePerson] ? (
-                      <button
-                        onClick={() => handleUnlockSubmission(activePerson)}
-                        className="px-4 py-2 bg-amber-600 text-white text-xs font-bold rounded-xl hover:bg-amber-700 transition"
-                      >
-                        🔓 Desbloquear (Requer senha)
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => handleFinishSubmission(activePerson)}
-                        className="px-4 py-2 bg-emerald-600 text-white text-xs font-bold rounded-xl hover:bg-emerald-700 transition"
-                      >
-                        🔒 Finalizar Meu Preenchimento
-                      </button>
-                    )}
-                  </div>
+                <div className="bg-palette-secondary/50 p-4 rounded-2xl border border-palette-border text-center">
+                  <span className="text-xs font-semibold text-palette-primary uppercase tracking-wider">
+                    A aular no momento:
+                  </span>
+                  <p className="text-base font-bold text-palette-dark">
+                    {activePerson === 'person1' ? '👤 Perfil da Pessoa 1' : '👤 Perfil da Pessoa 2'}
+                  </p>
                 </div>
 
                 {/* CARTÕES EXPANSÍVEIS DO FORMULÁRIO */}
@@ -502,21 +452,19 @@
                             {cat.items.map((item, idx) => {
                               const itemKey = `${cat.id}_${idx}`;
                               const currentStar = ratings[activePerson]?.[itemKey] || 0;
-                              const isLocked = statusSubmission[activePerson];
 
                               return (
-                                <div key={idx} className={`p-4 rounded-2xl border flex flex-col justify-between ${isLocked ? 'bg-gray-100 border-gray-200 opacity-75' : 'bg-palette-secondary/30 border-palette-border/60'}`}>
+                                <div key={idx} className="p-4 rounded-2xl border flex flex-col justify-between bg-palette-secondary/30 border-palette-border/60">
                                   <span className="font-medium text-sm text-palette-dark mb-3">
-                                    {item} {isLocked && '🔒'}
+                                    {item}
                                   </span>
 
                                   <div className="flex items-center gap-1">
                                     {[1, 2, 3, 4, 5].map(star => (
                                       <button
                                         key={star}
-                                        disabled={isLocked}
                                         onClick={() => handleRating(itemKey, star)}
-                                        className={`text-2xl transition-transform ${isLocked ? 'cursor-not-allowed' : 'hover:scale-125'} ${
+                                        className={`text-2xl transition-transform hover:scale-125 ${
                                           star <= currentStar ? 'text-amber-500' : 'text-gray-300'
                                         }`}
                                       >
@@ -537,67 +485,67 @@
                   })}
                 </div>
 
-                {/* BLOCO DE AFINIDADES - SÓ APARECE QUANDO AMBOS FINALIZAM */}
-                <div className="bg-white p-6 rounded-3xl border border-palette-border shadow-sm">
-                  <h3 className="font-serif font-bold text-2xl text-palette-dark mb-2">
-                    Afinidades Encontradas (Coincidências) ✨
-                  </h3>
-                  
-                  {!bothCompleted ? (
-                    <div className="text-center py-10 bg-palette-secondary/50 rounded-2xl border border-dashed border-palette-border p-6">
-                      <span className="text-3xl mb-2 block">🔒</span>
-                      <h4 className="font-bold text-palette-dark text-lg mb-1">Resultados Bloqueados</h4>
-                      <p className="text-sm text-palette-dark/70 max-w-md mx-auto">
-                        Para manter a surpresa e garantir que ambos responderam de forma independente, as afinidades em comum só serão reveladas quando a **Pessoa 1** e a **Pessoa 2** clicarem em <em>"Finalizar Meu Preenchimento"</em>.
-                      </p>
-                      <div className="mt-4 flex justify-center gap-4 text-xs font-semibold">
-                        <span className={`px-3 py-1 rounded-full ${statusSubmission.person1 ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
-                          Pessoa 1: {statusSubmission.person1 ? 'Pronto ✔️' : 'Pendente ⏳'}
-                        </span>
-                        <span className={`px-3 py-1 rounded-full ${statusSubmission.person2 ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
-                          Pessoa 2: {statusSubmission.person2 ? 'Pronto ✔️' : 'Pendente ⏳'}
-                        </span>
-                      </div>
-                    </div>
-                  ) : (
-                    <div>
-                      <p className="text-sm text-palette-dark/60 mb-6">
-                        Experiências que ambos avaliaram com nota alta (4 ou 5 estrelas):
-                      </p>
-                      <div className="space-y-3">
-                        {(() => {
-                          const matches = [];
-                          CATEGORIES.forEach(cat => {
-                            cat.items.forEach((item, idx) => {
-                              const key = `${cat.id}_${idx}`;
-                              const r1 = ratings.person1?.[key] || 0;
-                              const r2 = ratings.person2?.[key] || 0;
-                              if (r1 >= 4 && r2 >= 4) {
-                                matches.push({ item, category: cat.title });
-                              }
-                            });
-                          });
+                {/* TABELA AUTOMÁTICA DE AFINIDADES */}
+                <div className="bg-white p-6 md:p-8 rounded-3xl border border-palette-border shadow-sm space-y-4">
+                  <div>
+                    <h3 className="font-serif font-bold text-2xl text-palette-dark mb-1">
+                      Tabela de Afinidades em Comum ✨
+                    </h3>
+                    <p className="text-sm text-palette-dark/60">
+                      Aqui aparecem automaticamente as atividades que ambos avaliaram com nota alta (4 ou 5 estrelas).
+                    </p>
+                  </div>
 
-                          if (matches.length === 0) {
-                            return (
-                              <div className="text-center py-8 text-palette-dark/50 italic bg-palette-secondary/40 rounded-2xl border border-dashed border-palette-border">
-                                Nenhuma coincidência com notas 4 ou 5 estrelas encontrada entre vocês ainda!
-                              </div>
-                            );
+                  <div className="overflow-x-auto">
+                    {(() => {
+                      const matches = [];
+                      CATEGORIES.forEach(cat => {
+                        cat.items.forEach((item, idx) => {
+                          const key = `${cat.id}_${idx}`;
+                          const r1 = ratings.person1?.[key] || 0;
+                          const r2 = ratings.person2?.[key] || 0;
+                          if (r1 >= 4 && r2 >= 4) {
+                            matches.push({ item, category: cat.title, r1, r2 });
                           }
+                        });
+                      });
 
-                          return matches.map((m, i) => (
-                            <div key={i} className="p-4 bg-palette-secondary border border-palette-border rounded-2xl flex items-center justify-between">
-                              <span className="font-semibold text-palette-dark">{m.item}</span>
-                              <span className="text-xs bg-palette-primary/20 text-palette-primary px-3 py-1 rounded-full font-medium">
-                                {m.category.split('.')[1]}
-                              </span>
-                            </div>
-                          ));
-                        })()}
-                      </div>
-                    </div>
-                  )}
+                      if (matches.length === 0) {
+                        return (
+                          <div className="text-center py-10 text-palette-dark/50 italic bg-palette-secondary/30 rounded-2xl border border-dashed border-palette-border p-6">
+                            Nenhuma coincidência (notas 4 ou 5 de ambos) encontrada ainda. Continuem a avaliar as atividades! 🌟
+                          </div>
+                        );
+                      }
+
+                      return (
+                        <table className="w-full text-left border-collapse">
+                          <thead>
+                            <tr className="border-b border-palette-border text-xs font-semibold text-palette-primary uppercase tracking-wider">
+                              <th className="p-3">Atividade / Experiência</th>
+                              <th className="p-3">Categoria</th>
+                              <th className="p-3 text-center">Nota Pessoa 1</th>
+                              <th className="p-3 text-center">Nota Pessoa 2</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-palette-border/50 text-sm">
+                            {matches.map((m, i) => (
+                              <tr key={i} className="hover:bg-palette-secondary/30 transition">
+                                <td className="p-3 font-semibold text-palette-dark">{m.item}</td>
+                                <td className="p-3">
+                                  <span className="text-xs bg-palette-primary/10 text-palette-primary px-2.5 py-1 rounded-full font-medium">
+                                    {m.category.split('.')[1]}
+                                  </span>
+                                </td>
+                                <td className="p-3 text-center font-bold text-amber-600">{m.r1} ★</td>
+                                <td className="p-3 text-center font-bold text-amber-600">{m.r2} ★</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      );
+                    })()}
+                  </div>
                 </div>
               </div>
             )}
