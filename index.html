@@ -185,6 +185,25 @@
       memory: { photo: null, word: '', likedMost: '', momentToKeep: '', nextIdea: '' }
     }));
 
+    const INITIAL_SCRATCH_CARDS = [
+      { id: 1, title: 'Cartão Surpresa 1', prize: 'Noite de fondue e filme escolhido pelo sortudo!', scratched: false },
+      { id: 2, title: 'Cartão Surpresa 2', prize: 'Passeio surpresa de 2 horas em um lugar verde!', scratched: false },
+      { id: 3, title: 'Cartão Surpresa 3', prize: 'Café da manhã especial na cama preparado pelo outro!', scratched: false },
+      { id: 4, title: 'Cartão Surpresa 4', prize: 'Desafio de culinária: misturar 3 ingredientes surpresa!', scratched: false }
+    ];
+
+    const INITIAL_BINGO = [
+      { id: 1, text: 'Tirar uma foto engraçada com um animal na rua', done: false },
+      { id: 2, text: 'Provar um sabor de sorvete totalmente novo', done: false },
+      { id: 3, text: 'Fazer um elogio surpresa com bilhetinho', done: false },
+      { id: 4, text: 'Caminhar 30 minutos sem olhar no telemóvel', done: false },
+      { id: 5, text: 'Comprar um lanche surpresa para o outro', done: false },
+      { id: 6, text: 'Assistir ao pôr do sol em um local diferente', done: false },
+      { id: 7, text: 'Tirar uma selfie criativa em um ponto turístico', done: false },
+      { id: 8, text: 'Ouvir um álbum musical inteiro juntos', done: false },
+      { id: 9, text: 'Escrever uma gratidão mútua em um papel', done: false }
+    ];
+
     function App() {
       const [activeTab, setActiveTab] = useState('home');
       
@@ -204,9 +223,19 @@
         const saved = localStorage.getItem('guia_meetings');
         return saved ? JSON.parse(saved) : INITIAL_MEETINGS;
       });
+
+      const [scratchCards, setScratchCards] = useState(() => {
+        const saved = localStorage.getItem('guia_scratch');
+        return saved ? JSON.parse(saved) : INITIAL_SCRATCH_CARDS;
+      });
+
+      const [bingoItems, setBingoItems] = useState(() => {
+        const saved = localStorage.getItem('guia_bingo');
+        return saved ? JSON.parse(saved) : INITIAL_BINGO;
+      });
+
       const [selectedMeetingNum, setSelectedMeetingNum] = useState(1);
       const [openCategories, setOpenCategories] = useState({});
-
       const [memorySubTab, setMemorySubTab] = useState('diario');
 
       const [timeCapsule, setTimeCapsule] = useState(() => {
@@ -224,21 +253,12 @@
       const [isSpinning, setIsSpinning] = useState(false);
       const [rotationDegree, setRotationDegree] = useState(0);
 
-      useEffect(() => {
-        localStorage.setItem('guia_names', JSON.stringify(names));
-      }, [names]);
-
-      useEffect(() => {
-        localStorage.setItem('guia_ratings', JSON.stringify(ratings));
-      }, [ratings]);
-
-      useEffect(() => {
-        localStorage.setItem('guia_meetings', JSON.stringify(meetings));
-      }, [meetings]);
-
-      useEffect(() => {
-        localStorage.setItem('guia_time_capsule', JSON.stringify(timeCapsule));
-      }, [timeCapsule]);
+      useEffect(() => { localStorage.setItem('guia_names', JSON.stringify(names)); }, [names]);
+      useEffect(() => { localStorage.setItem('guia_ratings', JSON.stringify(ratings)); }, [ratings]);
+      useEffect(() => { localStorage.setItem('guia_meetings', JSON.stringify(meetings)); }, [meetings]);
+      useEffect(() => { localStorage.setItem('guia_time_capsule', JSON.stringify(timeCapsule)); }, [timeCapsule]);
+      useEffect(() => { localStorage.setItem('guia_scratch', JSON.stringify(scratchCards)); }, [scratchCards]);
+      useEffect(() => { localStorage.setItem('guia_bingo', JSON.stringify(bingoItems)); }, [bingoItems]);
 
       const spinRoulette = () => {
         if (isSpinning) return;
@@ -272,14 +292,19 @@
       };
 
       const handleRating = (itemKey, stars) => {
-        setRatings(prev => ({
-          ...prev,
-          [itemKey]: stars
-        }));
+        setRatings(prev => ({ ...prev, [itemKey]: stars }));
       };
 
       const handleMeetingUpdate = (updatedMeeting) => {
         setMeetings(prev => prev.map(m => m.number === updatedMeeting.number ? updatedMeeting : m));
+      };
+
+      const scratchCard = (id) => {
+        setScratchCards(prev => prev.map(card => card.id === id ? { ...card, scratched: true } : card));
+      };
+
+      const toggleBingo = (id) => {
+        setBingoItems(prev => prev.map(item => item.id === id ? { ...item, done: !item.done } : item));
       };
 
       const generatePDF = () => {
@@ -331,7 +356,8 @@
               { id: 'form', label: 'Formulário' },
               { id: 'ideas', label: 'Banco de Ideias' },
               { id: 'meetings', label: '12 Encontros' },
-              { id: 'memories', label: 'Memórias' }
+              { id: 'memories', label: 'Memórias' },
+              { id: 'games', label: 'Raspadinha & Bingo' }
             ].map(tab => (
               <button
                 key={tab.id}
@@ -350,7 +376,6 @@
           <main>
             {activeTab === 'home' && (
               <div className="bg-white p-6 md:p-8 rounded-3xl border border-palette-border shadow-sm space-y-6">
-                
                 <div className="my-2 space-y-4">
                   <div className="p-5 bg-palette-secondary/50 rounded-2xl border border-palette-border">
                     <h3 className="font-semibold text-palette-primary text-lg mb-2">
@@ -437,21 +462,6 @@
                     </button>
                   </div>
                 </div>
-
-                <div className="bg-palette-secondary border border-palette-border p-6 rounded-2xl text-center">
-                  <h3 className="font-serif font-bold text-xl text-palette-dark mb-2">
-                    Prontos para começar?
-                  </h3>
-                  <p className="text-sm text-palette-dark/70 mb-4">
-                    Preencham o formulário, gerem o PDF e enviem um ao outro para descobrirem as coincidências!
-                  </p>
-                  <button
-                    onClick={() => setActiveTab('form')}
-                    className="px-6 py-3 bg-palette-primary text-white font-medium rounded-xl hover:bg-palette-accent transition"
-                  >
-                    Ir para o Formulário de Preferências →
-                  </button>
-                </div>
               </div>
             )}
 
@@ -484,11 +494,7 @@
                 <div className="space-y-4">
                   {CATEGORIES.map(cat => {
                     const isOpen = !!openCategories[cat.id];
-                    
-                    const ratedCount = cat.items.filter((_, idx) => {
-                      const itemKey = `${cat.id}_${idx}`;
-                      return (ratings[itemKey] || 0) > 0;
-                    }).length;
+                    const ratedCount = cat.items.filter((_, idx) => (ratings[`${cat.id}_${idx}`] || 0) > 0).length;
 
                     return (
                       <div key={cat.id} className="bg-white rounded-3xl border border-palette-border shadow-sm overflow-hidden transition-all">
@@ -517,10 +523,7 @@
 
                               return (
                                 <div key={idx} className="p-4 rounded-2xl border flex flex-col justify-between bg-palette-secondary/30 border-palette-border/60">
-                                  <span className="font-medium text-sm text-palette-dark mb-3">
-                                    {item}
-                                  </span>
-
+                                  <span className="font-medium text-sm text-palette-dark mb-3">{item}</span>
                                   <div className="flex items-center gap-1">
                                     {[1, 2, 3, 4, 5].map(star => (
                                       <button
@@ -549,12 +552,8 @@
 
                 <div className="bg-gradient-to-r from-palette-primary to-palette-accent p-6 rounded-3xl text-white flex flex-col md:flex-row items-center justify-between gap-4 shadow-md mt-8">
                   <div>
-                    <h3 className="font-serif font-bold text-xl mb-1">
-                      Finalizou suas escolhas?
-                    </h3>
-                    <p className="text-xs opacity-90">
-                      Gere um PDF bonito com suas respostas e mande no WhatsApp para comparar com o seu amigo/a!
-                    </p>
+                    <h3 className="font-serif font-bold text-xl mb-1">Finalizou suas escolhas?</h3>
+                    <p className="text-xs opacity-90">Gere um PDF bonito com suas respostas e mande no WhatsApp!</p>
                   </div>
                   <button
                     onClick={generatePDF}
@@ -569,20 +568,13 @@
             {activeTab === 'ideas' && (
               <div className="bg-white p-6 md:p-8 rounded-3xl border border-palette-border shadow-sm space-y-6">
                 <div>
-                  <h2 className="font-serif text-2xl font-bold text-palette-dark">
-                    Banco de Ideias para Inspirar
-                  </h2>
-                  <p className="text-sm text-palette-dark/60">
-                    Use estas sugestões diretamente no planejamento do seu próximo encontro.
-                  </p>
+                  <h2 className="font-serif text-2xl font-bold text-palette-dark">Banco de Ideias para Inspirar</h2>
+                  <p className="text-sm text-palette-dark/60">Use estas sugestões diretamente no planejamento do seu próximo encontro.</p>
                 </div>
-
                 <div className="grid md:grid-cols-2 gap-6">
                   {CATEGORIES.map(cat => (
                     <div key={cat.id} className="p-5 bg-palette-secondary/40 rounded-2xl border border-palette-border">
-                      <h3 className="font-serif font-bold text-lg text-palette-primary mb-3 pb-2 border-b border-palette-border">
-                        {cat.title}
-                      </h3>
+                      <h3 className="font-serif font-bold text-lg text-palette-primary mb-3 pb-2 border-b border-palette-border">{cat.title}</h3>
                       <ul className="space-y-2">
                         {cat.items.map((item, idx) => (
                           <li key={idx} className="text-sm text-palette-dark/80 flex items-start gap-2">
@@ -600,13 +592,8 @@
             {activeTab === 'meetings' && (
               <div className="space-y-6">
                 <div className="bg-white p-6 rounded-3xl border border-palette-border shadow-sm">
-                  <h2 className="font-serif text-2xl font-bold text-palette-dark mb-2">
-                    Fichas dos 12 Encontros
-                  </h2>
-                  <p className="text-sm text-palette-dark/60 mb-6">
-                    Selecione o número do encontro para planejar os detalhes ou registrar como foi.
-                  </p>
-
+                  <h2 className="font-serif text-2xl font-bold text-palette-dark mb-2">Fichas dos 12 Encontros</h2>
+                  <p className="text-sm text-palette-dark/60 mb-6">Selecione o número do encontro para planejar os detalhes ou registrar como foi.</p>
                   <div className="grid grid-cols-4 md:grid-cols-6 gap-3">
                     {meetings.map(m => (
                       <button
@@ -620,17 +607,9 @@
                             : 'bg-palette-secondary/40 text-palette-dark border border-palette-border hover:bg-palette-secondary'
                         }`}
                       >
-                        <span className="text-xs uppercase font-sans tracking-widest opacity-80">
-                          Nº
-                        </span>
-                        <span className="text-2xl font-bold">
-                          {String(m.number).padStart(2, '0')}
-                        </span>
-                        {m.status === 'completed' && (
-                          <span className="text-[10px] font-sans font-semibold bg-emerald-200 text-emerald-900 px-1.5 py-0.5 rounded mt-1">
-                            Feito
-                          </span>
-                        )}
+                        <span className="text-xs uppercase font-sans tracking-widest opacity-80">Nº</span>
+                        <span className="text-2xl font-bold">{String(m.number).padStart(2, '0')}</span>
+                        {m.status === 'completed' && <span className="text-[10px] font-sans font-semibold bg-emerald-200 text-emerald-900 px-1.5 py-0.5 rounded mt-1">Feito</span>}
                       </button>
                     ))}
                   </div>
@@ -644,23 +623,16 @@
                     <div className="bg-white p-6 md:p-8 rounded-3xl border border-palette-border shadow-sm space-y-6">
                       <div className="flex justify-between items-center pb-4 border-b border-palette-border">
                         <div>
-                          <span className="text-xs font-semibold text-palette-primary uppercase tracking-widest">
-                            Ficha de Planejamento
-                          </span>
-                          <h3 className="font-serif text-3xl font-bold text-palette-dark">
-                            Encontro nº {String(currentMeeting.number).padStart(2, '0')}
-                          </h3>
+                          <span className="text-xs font-semibold text-palette-primary uppercase tracking-widest">Ficha de Planejamento</span>
+                          <h3 className="font-serif text-3xl font-bold text-palette-dark">Encontro nº {String(currentMeeting.number).padStart(2, '0')}</h3>
                         </div>
-
                         <button
                           onClick={() => handleMeetingUpdate({
                             ...currentMeeting,
                             status: currentMeeting.status === 'completed' ? 'planned' : 'completed'
                           })}
                           className={`px-4 py-2 rounded-xl text-xs font-bold transition ${
-                            currentMeeting.status === 'completed'
-                              ? 'bg-emerald-600 text-white'
-                              : 'bg-palette-secondary text-palette-dark border border-palette-border'
+                            currentMeeting.status === 'completed' ? 'bg-emerald-600 text-white' : 'bg-palette-secondary text-palette-dark border border-palette-border'
                           }`}
                         >
                           {currentMeeting.status === 'completed' ? '✓ Concluído' : 'Marcar Feito'}
@@ -669,9 +641,7 @@
 
                       <div className="grid md:grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-xs font-semibold text-palette-dark/70 mb-1">
-                            Nome da Experiência / Atividade
-                          </label>
+                          <label className="block text-xs font-semibold text-palette-dark/70 mb-1">Nome da Experiência / Atividade</label>
                           <input
                             type="text"
                             value={currentMeeting.title}
@@ -680,11 +650,8 @@
                             className="w-full p-3 bg-palette-secondary/40 border border-palette-border rounded-xl text-sm focus:outline-none focus:border-palette-primary"
                           />
                         </div>
-
                         <div>
-                          <label className="block text-xs font-semibold text-palette-dark/70 mb-1">
-                            Responsável pela Organização
-                          </label>
+                          <label className="block text-xs font-semibold text-palette-dark/70 mb-1">Responsável pela Organização</label>
                           <select
                             value={currentMeeting.organizer}
                             onChange={e => handleMeetingUpdate({ ...currentMeeting, organizer: e.target.value })}
@@ -694,11 +661,8 @@
                             <option value="Pessoa 2">{names.person2}</option>
                           </select>
                         </div>
-
                         <div>
-                          <label className="block text-xs font-semibold text-palette-dark/70 mb-1">
-                            Data Prevista
-                          </label>
+                          <label className="block text-xs font-semibold text-palette-dark/70 mb-1">Data Prevista</label>
                           <input
                             type="date"
                             value={currentMeeting.date}
@@ -706,11 +670,8 @@
                             className="w-full p-3 bg-palette-secondary/40 border border-palette-border rounded-xl text-sm focus:outline-none focus:border-palette-primary"
                           />
                         </div>
-
                         <div>
-                          <label className="block text-xs font-semibold text-palette-dark/70 mb-1">
-                            Local e Endereço
-                          </label>
+                          <label className="block text-xs font-semibold text-palette-dark/70 mb-1">Local e Endereço</label>
                           <input
                             type="text"
                             value={currentMeeting.location}
@@ -719,43 +680,6 @@
                             className="w-full p-3 bg-palette-secondary/40 border border-palette-border rounded-xl text-sm focus:outline-none focus:border-palette-primary"
                           />
                         </div>
-
-                        <div>
-                          <label className="block text-xs font-semibold text-palette-dark/70 mb-1">
-                            Horário de Saída
-                          </label>
-                          <input
-                            type="time"
-                            value={currentMeeting.timeDeparture}
-                            onChange={e => handleMeetingUpdate({ ...currentMeeting, timeDeparture: e.target.value })}
-                            className="w-full p-3 bg-palette-secondary/40 border border-palette-border rounded-xl text-sm focus:outline-none focus:border-palette-primary"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-xs font-semibold text-palette-dark/70 mb-1">
-                            Retorno Previsto
-                          </label>
-                          <input
-                            type="time"
-                            value={currentMeeting.timeReturn}
-                            onChange={e => handleMeetingUpdate({ ...currentMeeting, timeReturn: e.target.value })}
-                            className="w-full p-3 bg-palette-secondary/40 border border-palette-border rounded-xl text-sm focus:outline-none focus:border-palette-primary"
-                          />
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="block text-xs font-semibold text-palette-dark/70 mb-1">
-                          Pista ou Spoiler do Encontro
-                        </label>
-                        <textarea
-                          rows="2"
-                          value={currentMeeting.spoiler}
-                          onChange={e => handleMeetingUpdate({ ...currentMeeting, spoiler: e.target.value })}
-                          placeholder="Ex: Traga roupas confortáveis..."
-                          className="w-full p-3 bg-palette-secondary/40 border border-palette-border rounded-xl text-sm focus:outline-none focus:border-palette-primary"
-                        ></textarea>
                       </div>
                     </div>
                   );
@@ -768,270 +692,43 @@
                 <div className="flex bg-white p-2 rounded-2xl border border-palette-border shadow-sm justify-center gap-2">
                   <button
                     onClick={() => setMemorySubTab('diario')}
-                    className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition ${
-                      memorySubTab === 'diario'
-                        ? 'bg-palette-primary text-white shadow-sm'
-                        : 'text-palette-dark/70 hover:text-palette-dark bg-palette-secondary/40'
-                    }`}
+                    className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition ${memorySubTab === 'diario' ? 'bg-palette-primary text-white shadow-sm' : 'text-palette-dark/70 hover:text-palette-dark bg-palette-secondary/40'}`}
                   >
                     Diário dos Encontros
                   </button>
                   <button
                     onClick={() => setMemorySubTab('capsule')}
-                    className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition ${
-                      memorySubTab === 'capsule'
-                        ? 'bg-palette-primary text-white shadow-sm'
-                        : 'text-palette-dark/70 hover:text-palette-dark bg-palette-secondary/40'
-                    }`}
+                    className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition ${memorySubTab === 'capsule' ? 'bg-palette-primary text-white shadow-sm' : 'text-palette-dark/70 hover:text-palette-dark bg-palette-secondary/40'}`}
                   >
                     Cápsula do Tempo
                   </button>
                 </div>
 
-                {memorySubTab === 'diario' && (
-                  <div className="space-y-6">
-                    <div className="bg-white p-6 rounded-3xl border border-palette-border shadow-sm">
-                      <h2 className="font-serif text-2xl font-bold text-palette-dark mb-2">
-                        Registro das Memórias
-                      </h2>
-                      <p className="text-sm text-palette-dark/60 mb-6">
-                        Guarde fotos, recordações e palavras especiais vividas em cada encontro.
-                      </p>
-
-                      <div className="flex gap-2 overflow-x-auto pb-2">
-                        {meetings.map(m => (
-                          <button
-                            key={m.number}
-                            onClick={() => setSelectedMeetingNum(m.number)}
-                            className={`px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition ${
-                              selectedMeetingNum === m.number
-                                ? 'bg-palette-primary text-white'
-                                : 'bg-palette-secondary/40 text-palette-dark border border-palette-border hover:bg-palette-secondary'
-                            }`}
-                          >
-                            Encontro {String(m.number).padStart(2, '0')}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    {(() => {
-                      const currentMeeting = meetings.find(m => m.number === selectedMeetingNum);
-                      if (!currentMeeting) return null;
-
-                      const memory = currentMeeting.memory || {};
-
-                      const updateMemory = (field, val) => {
-                        handleMeetingUpdate({
-                          ...currentMeeting,
-                          memory: { ...memory, [field]: val }
-                        });
-                      };
-
-                      const handlePhotoUpload = (e) => {
-                        const file = e.target.files[0];
-                        if (file) {
-                          const reader = new FileReader();
-                          reader.onloadend = () => {
-                            updateMemory('photo', reader.result);
-                          };
-                          reader.readAsDataURL(file);
-                        }
-                      };
-
-                      return (
-                        <div className="bg-white p-6 md:p-8 rounded-3xl border border-palette-border shadow-sm space-y-6">
-                          <div className="border-b border-palette-border pb-4">
-                            <span className="text-xs font-semibold text-palette-primary uppercase tracking-widest">
-                              Diário do Encontro
-                            </span>
-                            <h3 className="font-serif text-3xl font-bold text-palette-dark">
-                              {currentMeeting.title || `Encontro ${currentMeeting.number}`}
-                            </h3>
-                          </div>
-
-                          <div className="grid md:grid-cols-2 gap-6">
-                            <div className="flex flex-col items-center">
-                              <div className="w-full bg-palette-secondary/40 p-4 rounded-2xl border border-palette-border shadow-inner text-center">
-                                {memory.photo ? (
-                                  <div className="relative group">
-                                    <img
-                                      src={memory.photo}
-                                      alt="Recordação"
-                                      className="w-full h-64 object-cover rounded-xl shadow-md mb-3"
-                                    />
-                                    <button
-                                      onClick={() => updateMemory('photo', null)}
-                                      className="absolute top-2 right-2 bg-red-600 text-white p-1.5 rounded-full text-xs opacity-80 hover:opacity-100"
-                                    >
-                                      ✕ Remover
-                                    </button>
-                                  </div>
-                                ) : (
-                                  <div className="h-64 border-2 border-dashed border-palette-border rounded-xl flex flex-col items-center justify-center p-6 text-palette-dark/40">
-                                    <span className="text-4xl mb-2">📷</span>
-                                    <p className="text-xs mb-4">Adicione uma foto, ingresso ou recordação</p>
-                                    <label className="cursor-pointer px-4 py-2 bg-palette-primary text-white rounded-xl text-xs font-semibold hover:bg-palette-accent transition">
-                                      Carregar Foto
-                                      <input type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
-                                    </label>
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-
-                            <div className="space-y-4">
-                              <div>
-                                <label className="block text-xs font-semibold text-palette-dark/70 mb-1">
-                                  Uma palavra para definir esse encontro:
-                                </label>
-                                <input
-                                  type="text"
-                                  value={memory.word || ''}
-                                  onChange={e => updateMemory('word', e.target.value)}
-                                  placeholder="Ex: Mágico, Inesquecível..."
-                                  className="w-full p-3 bg-palette-secondary/40 border border-palette-border rounded-xl text-sm focus:outline-none focus:border-palette-primary font-serif font-bold text-palette-primary"
-                                />
-                              </div>
-
-                              <div>
-                                <label className="block text-xs font-semibold text-palette-dark/70 mb-1">
-                                  O que mais gostei ou me surpreendeu:
-                                </label>
-                                <textarea
-                                  rows="2"
-                                  value={memory.likedMost || ''}
-                                  onChange={e => updateMemory('likedMost', e.target.value)}
-                                  className="w-full p-3 bg-palette-secondary/40 border border-palette-border rounded-xl text-sm focus:outline-none focus:border-palette-primary"
-                                ></textarea>
-                              </div>
-
-                              <div>
-                                <label className="block text-xs font-semibold text-palette-dark/70 mb-1">
-                                  Um momento que quero guardar na memória:
-                                </label>
-                                <textarea
-                                  rows="2"
-                                  value={memory.momentToKeep || ''}
-                                  onChange={e => updateMemory('momentToKeep', e.target.value)}
-                                  className="w-full p-3 bg-palette-secondary/40 border border-palette-border rounded-xl text-sm focus:outline-none focus:border-palette-primary"
-                                ></textarea>
-                              </div>
-
-                              <div>
-                                <label className="block text-xs font-semibold text-palette-dark/70 mb-1">
-                                  Uma ideia para o próximo encontro:
-                                </label>
-                                <input
-                                  type="text"
-                                  value={memory.nextIdea || ''}
-                                  onChange={e => updateMemory('nextIdea', e.target.value)}
-                                  className="w-full p-3 bg-palette-secondary/40 border border-palette-border rounded-xl text-sm focus:outline-none focus:border-palette-primary"
-                                />
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })()}
-                  </div>
-                )}
-
                 {memorySubTab === 'capsule' && (
                   <div className="bg-white p-6 md:p-8 rounded-3xl border border-palette-border shadow-sm space-y-6">
                     <div className="border-b border-palette-border pb-4">
-                      <span className="text-xs font-semibold text-palette-primary uppercase tracking-widest">
-                        Nossa História
-                      </span>
-                      <h2 className="font-serif text-3xl font-bold text-palette-dark">
-                        Cápsula do Tempo para o Futuro
-                      </h2>
-                      <p className="text-sm text-palette-dark/60 mt-1">
-                        Escrevam seus desejos e sonhos agora. A cápsula ficará trancada até que todos os 12 encontros sejam concluídos!
-                      </p>
+                      <span className="text-xs font-semibold text-palette-primary uppercase tracking-widest">Nossa História</span>
+                      <h2 className="font-serif text-3xl font-bold text-palette-dark">Cápsula do Tempo para o Futuro</h2>
+                      <p className="text-sm text-palette-dark/60 mt-1">A cápsula ficará trancada até que todos os 12 encontros sejam concluídos!</p>
                     </div>
 
                     <div className="space-y-4">
                       <div>
-                        <div className="flex justify-between items-center mb-1">
-                          <label className="block text-xs font-semibold text-palette-dark/70">
-                            Data ou Condição de Abertura:
-                          </label>
-                          <button
-                            onClick={() => setTimeCapsule({ ...timeCapsule, openDate: 'Conclusão dos 12 Encontros' })}
-                            className="text-xs text-palette-primary font-bold hover:underline"
-                          >
-                            Definir para Concluir os 12 Encontros
-                          </button>
-                        </div>
-                        <input
-                          type="text"
-                          disabled={timeCapsule.isSealed}
-                          value={timeCapsule.openDate}
-                          onChange={e => setTimeCapsule({ ...timeCapsule, openDate: e.target.value })}
-                          placeholder="Ex: Conclusão dos 12 Encontros ou 31/12/2026"
-                          className="w-full p-3 bg-palette-secondary/40 border border-palette-border rounded-xl text-sm focus:outline-none focus:border-palette-primary disabled:opacity-60 font-semibold text-palette-primary"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-xs font-semibold text-palette-dark/70 mb-1">
-                          Qual o destino dos sonhos que queremos realizar juntos?
-                        </label>
+                        <label className="block text-xs font-semibold text-palette-dark/70 mb-1">Qual o destino dos sonhos?</label>
                         <textarea
                           rows="2"
-                          disabled={timeCapsule.isSealed || (!allMeetingsCompleted && timeCapsule.openDate === 'Conclusão dos 12 Encontros' && timeCapsule.isSealed)}
+                          disabled={timeCapsule.isSealed}
                           value={timeCapsule.dreamDestination}
                           onChange={e => setTimeCapsule({ ...timeCapsule, dreamDestination: e.target.value })}
-                          placeholder="Ex: Viajar para a serra ou conhecer a praia X..."
-                          className="w-full p-3 bg-palette-secondary/40 border border-palette-border rounded-xl text-sm focus:outline-none focus:border-palette-primary disabled:opacity-60"
-                        ></textarea>
-                      </div>
-
-                      <div>
-                        <label className="block text-xs font-semibold text-palette-dark/70 mb-1">
-                          Nossa maior expectativa para estes 12 encontros:
-                        </label>
-                        <textarea
-                          rows="2"
-                          disabled={timeCapsule.isSealed}
-                          value={timeCapsule.bestExpectation}
-                          onChange={e => setTimeCapsule({ ...timeCapsule, bestExpectation: e.target.value })}
-                          placeholder="Ex: Criar o hábito de sair mais da rotina..."
-                          className="w-full p-3 bg-palette-secondary/40 border border-palette-border rounded-xl text-sm focus:outline-none focus:border-palette-primary disabled:opacity-60"
-                        ></textarea>
-                      </div>
-
-                      <div>
-                        <label className="block text-xs font-semibold text-palette-dark/70 mb-1">
-                          Uma mensagem secreta / promessa para o futuro:
-                        </label>
-                        <textarea
-                          rows="2"
-                          disabled={timeCapsule.isSealed}
-                          value={timeCapsule.secretMessage}
-                          onChange={e => setTimeCapsule({ ...timeCapsule, secretMessage: e.target.value })}
-                          placeholder="Ex: Espero que estejamos tão unidos quanto agora..."
                           className="w-full p-3 bg-palette-secondary/40 border border-palette-border rounded-xl text-sm focus:outline-none focus:border-palette-primary disabled:opacity-60"
                         ></textarea>
                       </div>
 
                       <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-4 bg-palette-secondary/30 p-5 rounded-2xl border border-palette-border">
-                        <div>
-                          <p className="font-bold text-palette-dark text-sm">
-                            Progresso: {completedCount} de 12 encontros concluídos
-                          </p>
-                          <p className="text-xs text-palette-dark/60">
-                            {allMeetingsCompleted ? 'Parabéns! Todos os 12 encontros concluídos. A cápsula pode ser aberta!' : 'A cápsula permanecerá selada até concluírem os 12 encontros.'}
-                          </p>
-                        </div>
+                        <p className="font-bold text-palette-dark text-sm">Progresso: {completedCount} de 12 encontros concluídos</p>
                         <button
                           onClick={() => setTimeCapsule({ ...timeCapsule, isSealed: !timeCapsule.isSealed })}
-                          className={`px-6 py-3 rounded-xl font-bold text-sm transition shadow-md ${
-                            timeCapsule.isSealed
-                              ? 'bg-amber-600 text-white hover:bg-amber-700'
-                              : 'bg-palette-primary text-white hover:bg-palette-accent'
-                          }`}
+                          className={`px-6 py-3 rounded-xl font-bold text-sm transition shadow-md ${timeCapsule.isSealed ? 'bg-amber-600 text-white' : 'bg-palette-primary text-white'}`}
                         >
                           {timeCapsule.isSealed ? '🔓 Desbloquear Cápsula' : '🔒 Selar Cápsula'}
                         </button>
@@ -1041,45 +738,83 @@
                 )}
               </div>
             )}
+
+            {/* ABA NOVA: RASPADINHA & BINGO */}
+            {activeTab === 'games' && (
+              <div className="space-y-8">
+                {/* 1. Raspadinha do Destino */}
+                <div className="bg-white p-6 md:p-8 rounded-3xl border border-palette-border shadow-sm space-y-6">
+                  <div>
+                    <span className="text-xs font-semibold text-palette-primary uppercase tracking-widest">Minijogo Interativo</span>
+                    <h2 className="font-serif text-2xl font-bold text-palette-dark">Raspadinha do Destino</h2>
+                    <p className="text-sm text-palette-dark/60">Clica em cima de um cartão para raspar e descobrir a atividade surpresa!</p>
+                  </div>
+
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    {scratchCards.map(card => (
+                      <div 
+                        key={card.id} 
+                        onClick={() => scratchCard(card.id)}
+                        className={`p-6 rounded-2xl border transition-all cursor-pointer text-center flex flex-col items-center justify-center min-h-[140px] shadow-sm ${
+                          card.scratched 
+                            ? 'bg-emerald-50 border-emerald-300 text-emerald-900' 
+                            : 'bg-gradient-to-br from-palette-primary to-palette-accent text-white hover:scale-[1.02]'
+                        }`}
+                      >
+                        {card.scratched ? (
+                          <>
+                            <span className="text-xs uppercase tracking-widest font-bold text-emerald-700 mb-1">Revelado! 🎉</span>
+                            <p className="font-serif font-bold text-base">{card.prize}</p>
+                          </>
+                        ) : (
+                          <>
+                            <span className="text-3xl mb-2">🎟️</span>
+                            <span className="font-serif font-bold text-lg">{card.title}</span>
+                            <span className="text-xs opacity-90 mt-1">Clica aqui para raspar</span>
+                          </>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 2. Bingo de Desafios Relâmpago */}
+                <div className="bg-white p-6 md:p-8 rounded-3xl border border-palette-border shadow-sm space-y-6">
+                  <div>
+                    <span className="text-xs font-semibold text-palette-primary uppercase tracking-widest">Micro-aventuras</span>
+                    <h2 className="font-serif text-2xl font-bold text-palette-dark">Bingo de Desafios Relâmpago</h2>
+                    <p className="text-sm text-palette-dark/60">Cumpram os desafios no dia a dia e marchem na cartela!</p>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    {bingoItems.map(item => (
+                      <div
+                        key={item.id}
+                        onClick={() => toggleBingo(item.id)}
+                        className={`p-4 rounded-2xl border transition cursor-pointer flex items-start gap-3 text-sm ${
+                          item.done
+                            ? 'bg-emerald-50 border-emerald-300 text-emerald-900 line-through'
+                            : 'bg-palette-secondary/30 border-palette-border text-palette-dark hover:bg-palette-secondary/60'
+                        }`}
+                      >
+                        <span className="text-lg font-bold">{item.done ? '✅' : '⬜'}</span>
+                        <span className="font-medium">{item.text}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
           </main>
 
           {/* TEMPLATE DO PDF ESCONDIDO */}
           <div id="pdf-template" style={{ display: 'none', padding: '20px', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
             <div style={{ textAlign: 'center', borderBottom: '2px solid #D35400', paddingBottom: '15px', marginBottom: '20px' }}>
-              <span style={{ fontSize: '10px', color: '#D35400', textTransform: 'uppercase', fontWeight: 'bold' }}>
-                Guia de Experiências & Encontros
-              </span>
-              <h1 style={{ fontFamily: 'Playfair Display, serif', color: '#4A235A', fontSize: '24px', margin: '5px 0' }}>
-                Aventura, Leveza e Companhia
-              </h1>
-              <p style={{ fontSize: '14px', color: '#D35400', fontWeight: 'bold', margin: 0 }}>
-                Perfil de Preferências: {userProfileName || 'Anônimo'}
-              </p>
+              <span style={{ fontSize: '10px', color: '#D35400', textTransform: 'uppercase', fontWeight: 'bold' }}>Guia de Experiências & Encontros</span>
+              <h1 style={{ fontFamily: 'Playfair Display, serif', color: '#4A235A', fontSize: '24px', margin: '5px 0' }}>Aventura, Leveza e Companhia</h1>
+              <p style={{ fontSize: '14px', color: '#D35400', fontWeight: 'bold', margin: 0 }}>Perfil de Preferências: {userProfileName || 'Anônimo'}</p>
             </div>
-
-            {CATEGORIES.map(cat => (
-              <div key={cat.id} style={{ marginBottom: '15px' }}>
-                <h3 style={{ fontSize: '14px', color: '#D35400', borderBottom: '1px solid #EADCD7', paddingBottom: '4px', margin: '10px 0' }}>
-                  {cat.title}
-                </h3>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                  {cat.items.map((item, idx) => {
-                    const key = `${cat.id}_${idx}`;
-                    const score = ratings[key] || 0;
-                    return (
-                      <div key={idx} style={{ padding: '6px 10px', backgroundColor: '#FAF6F0', borderRadius: '8px', border: '1px solid #EADCD7', fontSize: '11px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span>{item}</span>
-                        <strong style={{ color: score >= 4 ? '#D35400' : '#4A235A' }}>
-                          {score > 0 ? `${score} ★` : '-'}
-                        </strong>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
           </div>
-
         </div>
       );
     }
