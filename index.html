@@ -368,7 +368,8 @@
             </div>
           </header>
 
-          <nav className="flex justify-center gap-2 md:gap-3 mb-8 overflow-x-auto pb-2">
+          {/* MENU RESPONSIVO COM SCROLL HORIZONTAL SUAVE E SEM CORTAR */}
+          <nav className="flex justify-start md:justify-center gap-2 mb-8 overflow-x-auto pb-3 pt-1 px-1 scrollbar-thin">
             {[
               { id: 'home', label: 'Introdução' },
               { id: 'form', label: 'Formulário' },
@@ -379,7 +380,7 @@
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`px-4 py-2.5 rounded-xl font-medium text-sm transition-all whitespace-nowrap ${
+                className={`px-4 py-2.5 rounded-xl font-medium text-sm transition-all whitespace-nowrap shrink-0 shadow-sm ${
                   activeTab === tab.id
                     ? 'bg-palette-primary text-white shadow-md'
                     : 'bg-white text-palette-dark hover:bg-palette-secondary border border-palette-border'
