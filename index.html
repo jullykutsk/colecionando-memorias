@@ -469,19 +469,19 @@
                       <div key={cat.id} className="bg-white rounded-3xl border border-palette-border shadow-sm overflow-hidden transition-all">
                         <button
                           onClick={() => toggleCategory(cat.id)}
-                          className="w-full p-5 bg-palette-secondary/30 hover:bg-palette-secondary/60 flex items-center justify-between text-left transition"
+                          className="w-full p-5 bg-palette-secondary/30 hover:bg-palette-secondary/60 flex items-center justify-between gap-3 text-left transition"
                         >
-                          <div className="flex items-center gap-3">
-                            <h3 className="font-serif font-bold text-lg md:text-xl text-palette-primary">
-                              {cat.title}
-                            </h3>
-                            <span className="text-xs bg-palette-primary/10 text-palette-primary px-2.5 py-1 rounded-full font-semibold">
+                          <h3 className="font-serif font-bold text-lg md:text-xl text-palette-primary flex-1 min-w-0">
+                            {cat.title}
+                          </h3>
+                          <div className="flex items-center gap-3 shrink-0">
+                            <span className="text-xs bg-palette-primary/10 text-palette-primary px-2.5 py-1 rounded-full font-semibold whitespace-nowrap">
                               {ratedCount}/{cat.items.length} avaliados
                             </span>
+                            <span className="text-palette-primary font-bold text-2xl w-6 text-center">
+                              {isOpen ? '−' : '+'}
+                            </span>
                           </div>
-                          <span className="text-palette-primary font-bold text-2xl transition-transform duration-300">
-                            {isOpen ? '−' : '+'}
-                          </span>
                         </button>
 
                         {isOpen && (
