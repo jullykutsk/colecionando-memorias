@@ -205,10 +205,9 @@
         return saved ? JSON.parse(saved) : { person1: {}, person2: {} };
       });
 
-      // Controla qual perfil está sendo editado e qual está sendo visualizado
+      // Seleciona qual perfil está ativo para preenchimento/visualização
       const [activePerson, setActivePerson] = useState('person1');
-      const [viewMode, setViewMode] = useState('edit'); // 'edit' ou 'view'
-      const [viewTargetPerson, setViewTargetPerson] = useState('person2');
+      const [mode, setMode] = useState('edit'); // 'edit' ou 'view'
 
       const [meetings, setMeetings] = useState(() => {
         const saved = localStorage.getItem('guia_meetings');
@@ -268,7 +267,7 @@
       });
 
       const handleRating = (itemKey, stars) => {
-        if (viewMode === 'view') return; // Se estiver apenas visualizando o outro, não deixa alterar
+        if (mode === 'view') return; // Se estiver a ver o outro, bloqueia alteração
         setRatings(prev => ({
           ...prev,
           [activePerson]: {
@@ -283,10 +282,7 @@
       };
 
       const completedCount = meetings.filter(m => m.status === 'completed').length;
-
-      // Define de quem é o perfil exibido no formulário neste momento
-      const displayedPerson = viewMode === 'edit' ? activePerson : viewTargetPerson;
-      const displayedPersonName = displayedPerson === 'person1' ? names.person1 : names.person2;
+      const activeName = activePerson === 'person1' ? names.person1 : names.person2;
 
       return (
         <div className="max-w-4xl mx-auto px-4 py-6">
@@ -456,36 +452,36 @@
                     </p>
                   </div>
 
-                  {/* SELEÇÃO DE QUEM ESTÁ A EDITAR OU A VER */}
+                  {/* SELEÇÃO LIMPA DE PERFIS E MODO */}
                   <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
                     <div className="flex bg-palette-secondary p-1.5 rounded-2xl border border-palette-border justify-center gap-1">
                       <button
-                        onClick={() => { setActivePerson('person1'); setViewMode('edit'); }}
+                        onClick={() => { setActivePerson('person1'); setMode('edit'); }}
                         className={`px-3 py-2 rounded-xl text-xs md:text-sm font-semibold transition ${
-                          viewMode === 'edit' && activePerson === 'person1'
+                          activePerson === 'person1' && mode === 'edit'
                             ? 'bg-palette-primary text-white shadow-sm'
                             : 'text-palette-dark/70 hover:text-palette-dark'
                         }`}
                       >
-                        Editar {names.person1}
+                        {names.person1} (Editar)
                       </button>
                       <button
-                        onClick={() => { setActivePerson('person2'); setViewMode('edit'); }}
+                        onClick={() => { setActivePerson('person2'); setMode('edit'); }}
                         className={`px-3 py-2 rounded-xl text-xs md:text-sm font-semibold transition ${
-                          viewMode === 'edit' && activePerson === 'person2'
+                          activePerson === 'person2' && mode === 'edit'
                             ? 'bg-palette-primary text-white shadow-sm'
                             : 'text-palette-dark/70 hover:text-palette-dark'
                         }`}
                       >
-                        Editar {names.person2}
+                        {names.person2} (Editar)
                       </button>
                     </div>
 
                     <div className="flex bg-palette-secondary p-1.5 rounded-2xl border border-palette-border justify-center gap-1">
                       <button
-                        onClick={() => { setViewMode('view'); setViewTargetPerson('person1'); }}
+                        onClick={() => { setActivePerson('person1'); setMode('view'); }}
                         className={`px-3 py-2 rounded-xl text-xs md:text-sm font-semibold transition ${
-                          viewMode === 'view' && viewTargetPerson === 'person1'
+                          activePerson === 'person1' && mode === 'view'
                             ? 'bg-palette-dark text-white shadow-sm'
                             : 'text-palette-dark/70 hover:text-palette-dark'
                         }`}
@@ -493,9 +489,9 @@
                         Ver {names.person1}
                       </button>
                       <button
-                        onClick={() => { setViewMode('view'); setViewTargetPerson('person2'); }}
+                        onClick={() => { setActivePerson('person2'); setMode('view'); }}
                         className={`px-3 py-2 rounded-xl text-xs md:text-sm font-semibold transition ${
-                          viewMode === 'view' && viewTargetPerson === 'person2'
+                          activePerson === 'person2' && mode === 'view'
                             ? 'bg-palette-dark text-white shadow-sm'
                             : 'text-palette-dark/70 hover:text-palette-dark'
                         }`}
@@ -506,12 +502,12 @@
                   </div>
                 </div>
 
-                <div className={`p-4 rounded-2xl border text-center ${viewMode === 'edit' ? 'bg-palette-secondary/50 border-palette-border' : 'bg-amber-50 border-amber-200'}`}>
+                <div className={`p-4 rounded-2xl border text-center ${mode === 'edit' ? 'bg-palette-secondary/50 border-palette-border' : 'bg-amber-50 border-amber-200'}`}>
                   <span className="text-xs font-semibold uppercase tracking-wider block mb-1">
-                    {viewMode === 'edit' ? 'A avaliar no momento:' : 'Modo de Visualização:'}
+                    {mode === 'edit' ? 'A avaliar no momento:' : 'Visualizando Perfil de:'}
                   </span>
                   <p className="text-base font-bold text-palette-dark">
-                    Perfil de {displayedPersonName} {viewMode === 'view' ? '(Somente Leitura)' : ''}
+                    Perfil de {activeName} {mode === 'view' ? '(Modo Leitura)' : ''}
                   </p>
                 </div>
 
@@ -522,7 +518,7 @@
                     
                     const ratedCount = cat.items.filter((_, idx) => {
                       const itemKey = `${cat.id}_${idx}`;
-                      return (ratings[displayedPerson]?.[itemKey] || 0) > 0;
+                      return (ratings[activePerson]?.[itemKey] || 0) > 0;
                     }).length;
 
                     return (
@@ -548,7 +544,7 @@
                           <div className="p-6 grid md:grid-cols-2 gap-4 border-t border-palette-border bg-white">
                             {cat.items.map((item, idx) => {
                               const itemKey = `${cat.id}_${idx}`;
-                              const currentStar = ratings[displayedPerson]?.[itemKey] || 0;
+                              const currentStar = ratings[activePerson]?.[itemKey] || 0;
 
                               return (
                                 <div key={idx} className="p-4 rounded-2xl border flex flex-col justify-between bg-palette-secondary/30 border-palette-border/60">
@@ -560,9 +556,9 @@
                                     {[1, 2, 3, 4, 5].map(star => (
                                       <button
                                         key={star}
-                                        disabled={viewMode === 'view'}
+                                        disabled={mode === 'view'}
                                         onClick={() => handleRating(itemKey, star)}
-                                        className={`text-2xl transition-transform ${viewMode === 'edit' ? 'hover:scale-125 cursor-pointer' : 'cursor-default'} ${
+                                        className={`text-2xl transition-transform ${mode === 'edit' ? 'hover:scale-125 cursor-pointer' : 'cursor-default'} ${
                                           star <= currentStar ? 'text-amber-500' : 'text-gray-300'
                                         }`}
                                       >
