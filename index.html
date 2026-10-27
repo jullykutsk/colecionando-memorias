@@ -441,7 +441,7 @@
                       Formulário de Preferências
                     </h2>
                     <p className="text-sm text-palette-dark/60">
-                      Preencha suas notas e clique em gerar PDF para enviar ao seu par.
+                      Preencha suas notas e gere o PDF no final para enviar ao seu par.
                     </p>
                   </div>
 
@@ -458,24 +458,6 @@
                       className="p-2 bg-white border border-palette-border rounded-xl text-xs font-bold text-palette-primary focus:outline-none w-full"
                     />
                   </div>
-                </div>
-
-                {/* BOTÃO DE GERAR PDF DESTACADO */}
-                <div className="bg-gradient-to-r from-palette-primary to-palette-accent p-6 rounded-3xl text-white flex flex-col md:flex-row items-center justify-between gap-4 shadow-md">
-                  <div>
-                    <h3 className="font-serif font-bold text-xl mb-1">
-                      Finalizou suas escolhas?
-                    </h3>
-                    <p className="text-xs opacity-90">
-                      Gere um PDF bonito com suas respostas e mande no WhatsApp para comparar com o seu par!
-                    </p>
-                  </div>
-                  <button
-                    onClick={generatePDF}
-                    className="px-6 py-3 bg-white text-palette-primary font-bold rounded-2xl hover:bg-palette-secondary transition text-sm shadow-md whitespace-nowrap"
-                  >
-                    Baixar Meu PDF Personalizado
-                  </button>
                 </div>
 
                 {/* CARTÕES EXPANSÍVEIS DO FORMULÁRIO */}
@@ -543,6 +525,24 @@
                       </div>
                     );
                   })}
+                </div>
+
+                {/* BOTÃO DE GERAR PDF NO FINAL DO FORMULÁRIO */}
+                <div className="bg-gradient-to-r from-palette-primary to-palette-accent p-6 rounded-3xl text-white flex flex-col md:flex-row items-center justify-between gap-4 shadow-md mt-8">
+                  <div>
+                    <h3 className="font-serif font-bold text-xl mb-1">
+                      Finalizou suas escolhas?
+                    </h3>
+                    <p className="text-xs opacity-90">
+                      Gere um PDF bonito com suas respostas e mande no WhatsApp para comparar com o seu amigo/a!
+                    </p>
+                  </div>
+                  <button
+                    onClick={generatePDF}
+                    className="px-6 py-3 bg-white text-palette-primary font-bold rounded-2xl hover:bg-palette-secondary transition text-sm shadow-md whitespace-nowrap"
+                  >
+                    Baixar Meu PDF Personalizado
+                  </button>
                 </div>
               </div>
             )}
@@ -894,7 +894,7 @@
             )}
           </main>
 
-          {/* TEMPLATE DO PDF ESCONDIDO (SERÁ IMPRESSO AO CLICAR EM GERAR PDF) */}
+          {/* TEMPLATE DO PDF ESCONDIDO */}
           <div id="pdf-template" style={{ display: 'none', padding: '20px', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
             <div style={{ textAlign: 'center', borderBottom: '2px solid #D35400', paddingBottom: '15px', marginBottom: '20px' }}>
               <span style={{ fontSize: '10px', color: '#D35400', textTransform: 'uppercase', fontWeight: 'bold' }}>
