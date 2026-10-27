@@ -195,10 +195,9 @@
     function App() {
       const [activeTab, setActiveTab] = useState('home');
       
-      // Nomes personalizáveis das duas pessoas
       const [names, setNames] = useState(() => {
         const saved = localStorage.getItem('guia_names');
-        return saved ? JSON.parse(saved) : { person1: 'Pessoa 1', person2: 'Pessoa 2' };
+        return saved ? JSON.parse(saved) : { person1: 'Jully', person2: 'Pedro' };
       });
 
       const [ratings, setRatings] = useState(() => {
@@ -347,6 +346,32 @@
                   </div>
                 </div>
 
+                {/* CAIXA PARA EDITAR OS NOMES NA PÁGINA INICIAL */}
+                <div className="bg-white p-5 rounded-3xl border border-palette-border shadow-sm grid md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-palette-dark/70 mb-1">
+                      Editar Nome da Pessoa 1:
+                    </label>
+                    <input
+                      type="text"
+                      value={names.person1}
+                      onChange={e => setNames({ ...names, person1: e.target.value })}
+                      className="w-full p-3 bg-palette-secondary/40 border border-palette-border rounded-xl text-sm font-semibold text-palette-dark focus:outline-none focus:border-palette-primary"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-palette-dark/70 mb-1">
+                      Editar Nome da Pessoa 2:
+                    </label>
+                    <input
+                      type="text"
+                      value={names.person2}
+                      onChange={e => setNames({ ...names, person2: e.target.value })}
+                      className="w-full p-3 bg-palette-secondary/40 border border-palette-border rounded-xl text-sm font-semibold text-palette-dark focus:outline-none focus:border-palette-primary"
+                    />
+                  </div>
+                </div>
+
                 {/* ROLETA INTERATIVA GIRATÓRIA */}
                 <div className="bg-gradient-to-r from-palette-secondary to-white p-6 rounded-3xl border-2 border-palette-border text-center space-y-4 shadow-sm">
                   <span className="text-xs font-semibold text-palette-primary uppercase tracking-widest">
@@ -418,11 +443,10 @@
                       Formulário de Preferências
                     </h2>
                     <p className="text-sm text-palette-dark/60">
-                      Altere os nomes abaixo se desejar e avalie as atividades para ver as coincidências.
+                      Avalie as atividades em cada categoria para ver as coincidências na tabela abaixo.
                     </p>
                   </div>
 
-                  {/* SELEÇÃO E EDIÇÃO DOS NOMES */}
                   <div className="flex bg-palette-secondary p-1.5 rounded-2xl border border-palette-border w-full md:w-auto justify-center gap-2">
                     <button
                       onClick={() => setActivePerson('person1')}
@@ -432,7 +456,7 @@
                           : 'text-palette-dark/70 hover:text-palette-dark'
                       }`}
                     >
-                      {names.person1} ✏️
+                      {names.person1}
                     </button>
                     <button
                       onClick={() => setActivePerson('person2')}
@@ -442,34 +466,8 @@
                           : 'text-palette-dark/70 hover:text-palette-dark'
                       }`}
                     >
-                      {names.person2} ✏️
+                      {names.person2}
                     </button>
-                  </div>
-                </div>
-
-                {/* CAIXA PARA EDITAR OS NOMES FACILMENTE */}
-                <div className="bg-white p-5 rounded-3xl border border-palette-border shadow-sm grid md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-semibold text-palette-dark/70 mb-1">
-                      Editar Nome da Pessoa 1:
-                    </label>
-                    <input
-                      type="text"
-                      value={names.person1}
-                      onChange={e => setNames({ ...names, person1: e.target.value })}
-                      className="w-full p-3 bg-palette-secondary/40 border border-palette-border rounded-xl text-sm font-semibold text-palette-dark focus:outline-none focus:border-palette-primary"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-palette-dark/70 mb-1">
-                      Editar Nome da Pessoa 2:
-                    </label>
-                    <input
-                      type="text"
-                      value={names.person2}
-                      onChange={e => setNames({ ...names, person2: e.target.value })}
-                      className="w-full p-3 bg-palette-secondary/40 border border-palette-border rounded-xl text-sm font-semibold text-palette-dark focus:outline-none focus:border-palette-primary"
-                    />
                   </div>
                 </div>
 
