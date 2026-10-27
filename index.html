@@ -207,6 +207,21 @@
       const [selectedMeetingNum, setSelectedMeetingNum] = useState(1);
       const [openCategories, setOpenCategories] = useState({});
 
+      // Sub-aba dentro de Memórias: 'meetings' (Diário dos Encontros) ou 'capsule' (Cápsula do Tempo)
+      const [memorySubTab, setMemorySubTab] = useState('diario');
+
+      // Estado da Cápsula do Tempo
+      const [timeCapsule, setTimeCapsule] = useState(() => {
+        const saved = localStorage.getItem('guia_time_capsule');
+        return saved ? JSON.parse(saved) : {
+          openDate: '',
+          dreamDestination: '',
+          bestExpectation: '',
+          secretMessage: '',
+          isSealed: false
+        };
+      });
+
       const [rouletteWinner, setRouletteWinner] = useState(null);
       const [isSpinning, setIsSpinning] = useState(false);
       const [rotationDegree, setRotationDegree] = useState(0);
@@ -223,13 +238,15 @@
         localStorage.setItem('guia_meetings', JSON.stringify(meetings));
       }, [meetings]);
 
-      // Roleta Sincronizada baseada nos nomes (dará sempre o mesmo resultado em qualquer telemóvel)
+      useEffect(() => {
+        localStorage.setItem('guia_time_capsule', JSON.stringify(timeCapsule));
+      }, [timeCapsule]);
+
       const spinRoulette = () => {
         if (isSpinning) return;
         setIsSpinning(true);
         setRouletteWinner(null);
 
-        // Define o vencedor com base na soma das letras dos dois nomes inseridos
         const combinedString = (names.person1 + names.person2).toLowerCase();
         let charCodeSum = 0;
         for (let i = 0; i < combinedString.length; i++) {
@@ -749,150 +766,272 @@
 
             {activeTab === 'memories' && (
               <div className="space-y-6">
-                <div className="bg-white p-6 rounded-3xl border border-palette-border shadow-sm">
-                  <h2 className="font-serif text-2xl font-bold text-palette-dark mb-2">
-                    Registro das Memórias
-                  </h2>
-                  <p className="text-sm text-palette-dark/60 mb-6">
-                    Guarde fotos, recordações e palavras especiais vividas em cada encontro.
-                  </p>
-
-                  <div className="flex gap-2 overflow-x-auto pb-2">
-                    {meetings.map(m => (
-                      <button
-                        key={m.number}
-                        onClick={() => setSelectedMeetingNum(m.number)}
-                        className={`px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition ${
-                          selectedMeetingNum === m.number
-                            ? 'bg-palette-primary text-white'
-                            : 'bg-palette-secondary/40 text-palette-dark border border-palette-border hover:bg-palette-secondary'
-                        }`}
-                      >
-                        Encontro {String(m.number).padStart(2, '0')}
-                      </button>
-                    ))}
-                  </div>
+                {/* SUB-ABAS DE MEMÓRIAS */}
+                <div className="flex bg-white p-2 rounded-2xl border border-palette-border shadow-sm justify-center gap-2">
+                  <button
+                    onClick={() => setMemorySubTab('diario')}
+                    className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition ${
+                      memorySubTab === 'diario'
+                        ? 'bg-palette-primary text-white shadow-sm'
+                        : 'text-palette-dark/70 hover:text-palette-dark bg-palette-secondary/40'
+                    }`}
+                  >
+                    Diário dos Encontros
+                  </button>
+                  <button
+                    onClick={() => setMemorySubTab('capsule')}
+                    className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition ${
+                      memorySubTab === 'capsule'
+                        ? 'bg-palette-primary text-white shadow-sm'
+                        : 'text-palette-dark/70 hover:text-palette-dark bg-palette-secondary/40'
+                    }`}
+                  >
+                    Cápsula do Tempo
+                  </button>
                 </div>
 
-                {(() => {
-                  const currentMeeting = meetings.find(m => m.number === selectedMeetingNum);
-                  if (!currentMeeting) return null;
+                {memorySubTab === 'diario' && (
+                  <div className="space-y-6">
+                    <div className="bg-white p-6 rounded-3xl border border-palette-border shadow-sm">
+                      <h2 className="font-serif text-2xl font-bold text-palette-dark mb-2">
+                        Registro das Memórias
+                      </h2>
+                      <p className="text-sm text-palette-dark/60 mb-6">
+                        Guarde fotos, recordações e palavras especiais vividas em cada encontro.
+                      </p>
 
-                  const memory = currentMeeting.memory || {};
-
-                  const updateMemory = (field, val) => {
-                    handleMeetingUpdate({
-                      ...currentMeeting,
-                      memory: { ...memory, [field]: val }
-                    });
-                  };
-
-                  const handlePhotoUpload = (e) => {
-                    const file = e.target.files[0];
-                    if (file) {
-                      const reader = new FileReader();
-                      reader.onloadend = () => {
-                        updateMemory('photo', reader.result);
-                      };
-                      reader.readAsDataURL(file);
-                    }
-                  };
-
-                  return (
-                    <div className="bg-white p-6 md:p-8 rounded-3xl border border-palette-border shadow-sm space-y-6">
-                      <div className="border-b border-palette-border pb-4">
-                        <span className="text-xs font-semibold text-palette-primary uppercase tracking-widest">
-                          Diário do Encontro
-                        </span>
-                        <h3 className="font-serif text-3xl font-bold text-palette-dark">
-                          {currentMeeting.title || `Encontro ${currentMeeting.number}`}
-                        </h3>
-                      </div>
-
-                      <div className="grid md:grid-cols-2 gap-6">
-                        <div className="flex flex-col items-center">
-                          <div className="w-full bg-palette-secondary/40 p-4 rounded-2xl border border-palette-border shadow-inner text-center">
-                            {memory.photo ? (
-                              <div className="relative group">
-                                <img
-                                  src={memory.photo}
-                                  alt="Recordação"
-                                  className="w-full h-64 object-cover rounded-xl shadow-md mb-3"
-                                />
-                                <button
-                                  onClick={() => updateMemory('photo', null)}
-                                  className="absolute top-2 right-2 bg-red-600 text-white p-1.5 rounded-full text-xs opacity-80 hover:opacity-100"
-                                >
-                                  ✕ Remover
-                                </button>
-                              </div>
-                            ) : (
-                              <div className="h-64 border-2 border-dashed border-palette-border rounded-xl flex flex-col items-center justify-center p-6 text-palette-dark/40">
-                                <span className="text-4xl mb-2">📷</span>
-                                <p className="text-xs mb-4">Adicione uma foto, ingresso ou recordação</p>
-                                <label className="cursor-pointer px-4 py-2 bg-palette-primary text-white rounded-xl text-xs font-semibold hover:bg-palette-accent transition">
-                                  Carregar Foto
-                                  <input type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
-                                </label>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-
-                        <div className="space-y-4">
-                          <div>
-                            <label className="block text-xs font-semibold text-palette-dark/70 mb-1">
-                              Uma palavra para definir esse encontro:
-                            </label>
-                            <input
-                              type="text"
-                              value={memory.word || ''}
-                              onChange={e => updateMemory('word', e.target.value)}
-                              placeholder="Ex: Mágico, Inesquecível..."
-                              className="w-full p-3 bg-palette-secondary/40 border border-palette-border rounded-xl text-sm focus:outline-none focus:border-palette-primary font-serif font-bold text-palette-primary"
-                            />
-                          </div>
-
-                          <div>
-                            <label className="block text-xs font-semibold text-palette-dark/70 mb-1">
-                              O que mais gostei ou me surpreendeu:
-                            </label>
-                            <textarea
-                              rows="2"
-                              value={memory.likedMost || ''}
-                              onChange={e => updateMemory('likedMost', e.target.value)}
-                              className="w-full p-3 bg-palette-secondary/40 border border-palette-border rounded-xl text-sm focus:outline-none focus:border-palette-primary"
-                            ></textarea>
-                          </div>
-
-                          <div>
-                            <label className="block text-xs font-semibold text-palette-dark/70 mb-1">
-                              Um momento que quero guardar na memória:
-                            </label>
-                            <textarea
-                              rows="2"
-                              value={memory.momentToKeep || ''}
-                              onChange={e => updateMemory('momentToKeep', e.target.value)}
-                              className="w-full p-3 bg-palette-secondary/40 border border-palette-border rounded-xl text-sm focus:outline-none focus:border-palette-primary"
-                            ></textarea>
-                          </div>
-
-                          <div>
-                            <label className="block text-xs font-semibold text-palette-dark/70 mb-1">
-                              Uma ideia para o próximo encontro:
-                            </label>
-                            <input
-                              type="text"
-                              value={memory.nextIdea || ''}
-                              onChange={e => updateMemory('nextIdea', e.target.value)}
-                              className="w-full p-3 bg-palette-secondary/40 border border-palette-border rounded-xl text-sm focus:outline-none focus:border-palette-primary"
-                            />
-                          </div>
-                        </div>
+                      <div className="flex gap-2 overflow-x-auto pb-2">
+                        {meetings.map(m => (
+                          <button
+                            key={m.number}
+                            onClick={() => setSelectedMeetingNum(m.number)}
+                            className={`px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition ${
+                              selectedMeetingNum === m.number
+                                ? 'bg-palette-primary text-white'
+                                : 'bg-palette-secondary/40 text-palette-dark border border-palette-border hover:bg-palette-secondary'
+                            }`}
+                          >
+                            Encontro {String(m.number).padStart(2, '0')}
+                          </button>
+                        ))}
                       </div>
                     </div>
-                  );
-                })()}
+
+                    {(() => {
+                      const currentMeeting = meetings.find(m => m.number === selectedMeetingNum);
+                      if (!currentMeeting) return null;
+
+                      const memory = currentMeeting.memory || {};
+
+                      const updateMemory = (field, val) => {
+                        handleMeetingUpdate({
+                          ...currentMeeting,
+                          memory: { ...memory, [field]: val }
+                        });
+                      };
+
+                      const handlePhotoUpload = (e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onloadend = () => {
+                            updateMemory('photo', reader.result);
+                          };
+                          reader.readAsDataURL(file);
+                        }
+                      };
+
+                      return (
+                        <div className="bg-white p-6 md:p-8 rounded-3xl border border-palette-border shadow-sm space-y-6">
+                          <div className="border-b border-palette-border pb-4">
+                            <span className="text-xs font-semibold text-palette-primary uppercase tracking-widest">
+                              Diário do Encontro
+                            </span>
+                            <h3 className="font-serif text-3xl font-bold text-palette-dark">
+                              {currentMeeting.title || `Encontro ${currentMeeting.number}`}
+                            </h3>
+                          </div>
+
+                          <div className="grid md:grid-cols-2 gap-6">
+                            <div className="flex flex-col items-center">
+                              <div className="w-full bg-palette-secondary/40 p-4 rounded-2xl border border-palette-border shadow-inner text-center">
+                                {memory.photo ? (
+                                  <div className="relative group">
+                                    <img
+                                      src={memory.photo}
+                                      alt="Recordação"
+                                      className="w-full h-64 object-cover rounded-xl shadow-md mb-3"
+                                    />
+                                    <button
+                                      onClick={() => updateMemory('photo', null)}
+                                      className="absolute top-2 right-2 bg-red-600 text-white p-1.5 rounded-full text-xs opacity-80 hover:opacity-100"
+                                    >
+                                      ✕ Remover
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <div className="h-64 border-2 border-dashed border-palette-border rounded-xl flex flex-col items-center justify-center p-6 text-palette-dark/40">
+                                    <span className="text-4xl mb-2">📷</span>
+                                    <p className="text-xs mb-4">Adicione uma foto, ingresso ou recordação</p>
+                                    <label className="cursor-pointer px-4 py-2 bg-palette-primary text-white rounded-xl text-xs font-semibold hover:bg-palette-accent transition">
+                                      Carregar Foto
+                                      <input type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
+                                    </label>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+
+                            <div className="space-y-4">
+                              <div>
+                                <label className="block text-xs font-semibold text-palette-dark/70 mb-1">
+                                  Uma palavra para definir esse encontro:
+                                </label>
+                                <input
+                                  type="text"
+                                  value={memory.word || ''}
+                                  onChange={e => updateMemory('word', e.target.value)}
+                                  placeholder="Ex: Mágico, Inesquecível..."
+                                  className="w-full p-3 bg-palette-secondary/40 border border-palette-border rounded-xl text-sm focus:outline-none focus:border-palette-primary font-serif font-bold text-palette-primary"
+                                />
+                              </div>
+
+                              <div>
+                                <label className="block text-xs font-semibold text-palette-dark/70 mb-1">
+                                  O que mais gostei ou me surpreendeu:
+                                </label>
+                                <textarea
+                                  rows="2"
+                                  value={memory.likedMost || ''}
+                                  onChange={e => updateMemory('likedMost', e.target.value)}
+                                  className="w-full p-3 bg-palette-secondary/40 border border-palette-border rounded-xl text-sm focus:outline-none focus:border-palette-primary"
+                                ></textarea>
+                              </div>
+
+                              <div>
+                                <label className="block text-xs font-semibold text-palette-dark/70 mb-1">
+                                  Um momento que quero guardar na memória:
+                                </label>
+                                <textarea
+                                  rows="2"
+                                  value={memory.momentToKeep || ''}
+                                  onChange={e => updateMemory('momentToKeep', e.target.value)}
+                                  className="w-full p-3 bg-palette-secondary/40 border border-palette-border rounded-xl text-sm focus:outline-none focus:border-palette-primary"
+                                ></textarea>
+                              </div>
+
+                              <div>
+                                <label className="block text-xs font-semibold text-palette-dark/70 mb-1">
+                                  Uma ideia para o próximo encontro:
+                                </label>
+                                <input
+                                  type="text"
+                                  value={memory.nextIdea || ''}
+                                  onChange={e => updateMemory('nextIdea', e.target.value)}
+                                  className="w-full p-3 bg-palette-secondary/40 border border-palette-border rounded-xl text-sm focus:outline-none focus:border-palette-primary"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </div>
+                )}
+
+                {memorySubTab === 'capsule' && (
+                  <div className="bg-white p-6 md:p-8 rounded-3xl border border-palette-border shadow-sm space-y-6">
+                    <div className="border-b border-palette-border pb-4">
+                      <span className="text-xs font-semibold text-palette-primary uppercase tracking-widest">
+                        Nossa História
+                      </span>
+                      <h2 className="font-serif text-3xl font-bold text-palette-dark">
+                        Cápsula do Tempo para o Futuro
+                      </h2>
+                      <p className="text-sm text-palette-dark/60 mt-1">
+                        Escrevam seus desejos e sonhos agora. Se selarem a cápsula, eles ficarão guardados para serem revelados na data escolhida!
+                      </p>
+                    </div>
+
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-xs font-semibold text-palette-dark/70 mb-1">
+                          Data prevista para abrir a cápsula:
+                        </label>
+                        <input
+                          type="date"
+                          disabled={timeCapsule.isSealed}
+                          value={timeCapsule.openDate}
+                          onChange={e => setTimeCapsule({ ...timeCapsule, openDate: e.target.value })}
+                          className="w-full p-3 bg-palette-secondary/40 border border-palette-border rounded-xl text-sm focus:outline-none focus:border-palette-primary disabled:opacity-60"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-semibold text-palette-dark/70 mb-1">
+                          Qual o destino dos sonhos que queremos realizar juntos?
+                        </label>
+                        <textarea
+                          rows="2"
+                          disabled={timeCapsule.isSealed}
+                          value={timeCapsule.dreamDestination}
+                          onChange={e => setTimeCapsule({ ...timeCapsule, dreamDestination: e.target.value })}
+                          placeholder="Ex: Viajar para a serra ou conhecer a praia X..."
+                          className="w-full p-3 bg-palette-secondary/40 border border-palette-border rounded-xl text-sm focus:outline-none focus:border-palette-primary disabled:opacity-60"
+                        ></textarea>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-semibold text-palette-dark/70 mb-1">
+                          Nossa maior expectativa para estes 12 encontros:
+                        </label>
+                        <textarea
+                          rows="2"
+                          disabled={timeCapsule.isSealed}
+                          value={timeCapsule.bestExpectation}
+                          onChange={e => setTimeCapsule({ ...timeCapsule, bestExpectation: e.target.value })}
+                          placeholder="Ex: Criar o hábito de sair mais da rotina..."
+                          className="w-full p-3 bg-palette-secondary/40 border border-palette-border rounded-xl text-sm focus:outline-none focus:border-palette-primary disabled:opacity-60"
+                        ></textarea>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-semibold text-palette-dark/70 mb-1">
+                          Uma mensagem secreta / promessa para o futuro:
+                        </label>
+                        <textarea
+                          rows="2"
+                          disabled={timeCapsule.isSealed}
+                          value={timeCapsule.secretMessage}
+                          onChange={e => setTimeCapsule({ ...timeCapsule, secretMessage: e.target.value })}
+                          placeholder="Ex: Espero que estejamos tão unidos quanto agora..."
+                          className="w-full p-3 bg-palette-secondary/40 border border-palette-border rounded-xl text-sm focus:outline-none focus:border-palette-primary disabled:opacity-60"
+                        ></textarea>
+                      </div>
+
+                      <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-4 bg-palette-secondary/30 p-5 rounded-2xl border border-palette-border">
+                        <div>
+                          <p className="font-bold text-palette-dark text-sm">
+                            Estado atual: {timeCapsule.isSealed ? 'Cápsula Selada 🔒' : 'Aberta para Edição 🔓'}
+                          </p>
+                          <p className="text-xs text-palette-dark/60">
+                            {timeCapsule.isSealed ? 'Seus segredos estão guardados com segurança.' : 'Clique em selar quando terminarem de preencher.'}
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => setTimeCapsule({ ...timeCapsule, isSealed: !timeCapsule.isSealed })}
+                          className={`px-6 py-3 rounded-xl font-bold text-sm transition shadow-md ${
+                            timeCapsule.isSealed
+                              ? 'bg-amber-600 text-white hover:bg-amber-700'
+                              : 'bg-palette-primary text-white hover:bg-palette-accent'
+                          }`}
+                        >
+                          {timeCapsule.isSealed ? '🔓 Desbloquear Cápsula' : '🔒 Selar Cápsula'}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </main>
