@@ -223,13 +223,22 @@
         localStorage.setItem('guia_meetings', JSON.stringify(meetings));
       }, [meetings]);
 
+      // Roleta Sincronizada baseada nos nomes (dará sempre o mesmo resultado em qualquer telemóvel)
       const spinRoulette = () => {
         if (isSpinning) return;
         setIsSpinning(true);
         setRouletteWinner(null);
 
-        const winnerKey = Math.random() < 0.5 ? 'person1' : 'person2';
+        // Define o vencedor com base na soma das letras dos dois nomes inseridos
+        const combinedString = (names.person1 + names.person2).toLowerCase();
+        let charCodeSum = 0;
+        for (let i = 0; i < combinedString.length; i++) {
+          charCodeSum += combinedString.charCodeAt(i);
+        }
+        
+        const winnerKey = charCodeSum % 2 === 0 ? 'person1' : 'person2';
         const winnerName = names[winnerKey];
+
         const extraSpins = 360 * 5; 
         const targetAngle = winnerKey === 'person1' ? 0 : 180;
         const currentMod = rotationDegree % 360;
