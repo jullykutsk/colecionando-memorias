@@ -186,11 +186,11 @@
     }));
 
     const INITIAL_QUIZ_QUESTIONS = [
-      { id: 'q1', question: 'Um lugar de infância que marcou a minha vida e que gostaria de te levar:' },
-      { id: 'q2', question: 'Qual é a minha comida de conforto favorita para um dia relaxante?' },
-      { id: 'q3', question: 'Se eu ganhasse uma viagem surpresa hoje, para onde eu iria?' },
-      { id: 'q4', question: 'Qual foi o momento mais divertido ou engraçado que tivemos juntos até agora?' },
-      { id: 'q5', question: 'Uma música ou artista que define a trilha sonora dos meus dias:' }
+      { id: 1, question: 'Qual é a minha comida de conforto favorita para um dia relaxante?' },
+      { id: 2, question: 'Se eu ganhasse uma viagem surpresa hoje, para onde eu iria?' },
+      { id: 3, question: 'Qual foi o momento mais divertido ou engraçado que tivemos juntos até agora?' },
+      { id: 4, question: 'Um lugar de infância especial que eu gostaria de te levar:' },
+      { id: 5, question: 'Qual é a minha maior mania ou hábito curioso no dia a dia?' }
     ];
 
     const INITIAL_SCRATCH_CARDS = [
@@ -227,14 +227,14 @@
         return saved ? JSON.parse(saved) : {};
       });
 
-      const [quizAnswers, setQuizAnswers] = useState(() => {
-        const saved = localStorage.getItem('guia_quiz_answers');
-        return saved ? JSON.parse(saved) : {};
-      });
-
       const [meetings, setMeetings] = useState(() => {
         const saved = localStorage.getItem('guia_meetings');
         return saved ? JSON.parse(saved) : INITIAL_MEETINGS;
+      });
+
+      const [quizAnswers, setQuizAnswers] = useState(() => {
+        const saved = localStorage.getItem('guia_quiz_answers');
+        return saved ? JSON.parse(saved) : {};
       });
 
       const [scratchCards, setScratchCards] = useState(() => {
@@ -268,8 +268,8 @@
 
       useEffect(() => { localStorage.setItem('guia_names', JSON.stringify(names)); }, [names]);
       useEffect(() => { localStorage.setItem('guia_ratings', JSON.stringify(ratings)); }, [ratings]);
-      useEffect(() => { localStorage.setItem('guia_quiz_answers', JSON.stringify(quizAnswers)); }, [quizAnswers]);
       useEffect(() => { localStorage.setItem('guia_meetings', JSON.stringify(meetings)); }, [meetings]);
+      useEffect(() => { localStorage.setItem('guia_quiz_answers', JSON.stringify(quizAnswers)); }, [quizAnswers]);
       useEffect(() => { localStorage.setItem('guia_time_capsule', JSON.stringify(timeCapsule)); }, [timeCapsule]);
       useEffect(() => { localStorage.setItem('guia_scratch', JSON.stringify(scratchCards)); }, [scratchCards]);
       useEffect(() => { localStorage.setItem('guia_bingo', JSON.stringify(bingoItems)); }, [bingoItems]);
@@ -307,10 +307,6 @@
 
       const handleRating = (itemKey, stars) => {
         setRatings(prev => ({ ...prev, [itemKey]: stars }));
-      };
-
-      const handleQuizChange = (qId, text) => {
-        setQuizAnswers(prev => ({ ...prev, [qId]: text }));
       };
 
       const handleMeetingUpdate = (updatedMeeting) => {
@@ -598,20 +594,18 @@
               </div>
             )}
 
-            {/* ABA: QUIZ DE CONEXÃO COM CAMPO DE TEXTO E PDF */}
+            {/* ABA: QUIZ DE CONEXÃO COM GERADOR DE PDF */}
             {activeTab === 'quiz' && (
               <div className="space-y-6">
                 <div className="bg-white p-6 rounded-3xl border border-palette-border shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
                   <div>
                     <span className="text-xs font-semibold text-palette-primary uppercase tracking-widest">Conversa e Intimidade Leve</span>
                     <h2 className="font-serif text-2xl font-bold text-palette-dark">Quiz de Conexão</h2>
-                    <p className="text-sm text-palette-dark/60">Responda às perguntas abaixo e gere seu PDF para compartilhar com seu par.</p>
+                    <p className="text-sm text-palette-dark/60">Responda às perguntas abaixo e gere um PDF para compartilhar com seu par!</p>
                   </div>
 
                   <div className="w-full md:w-auto bg-palette-secondary p-3 rounded-2xl border border-palette-border flex items-center gap-2">
-                    <label className="text-xs font-bold text-palette-dark whitespace-nowrap">
-                      Meu Nome:
-                    </label>
+                    <label className="text-xs font-bold text-palette-dark whitespace-nowrap">Meu Nome:</label>
                     <input
                       type="text"
                       value={userProfileName}
@@ -624,23 +618,25 @@
 
                 <div className="space-y-4">
                   {INITIAL_QUIZ_QUESTIONS.map((q) => (
-                    <div key={q.id} className="bg-white p-6 rounded-3xl border border-palette-border shadow-sm space-y-3">
-                      <h3 className="font-serif font-bold text-lg text-palette-primary">{q.question}</h3>
+                    <div key={q.id} className="p-6 bg-white rounded-3xl border border-palette-border shadow-sm space-y-3">
+                      <span className="text-xs font-bold text-palette-primary uppercase">Pergunta {q.id} de {INITIAL_QUIZ_QUESTIONS.length}</span>
+                      <h3 className="font-serif font-bold text-lg text-palette-dark">{q.question}</h3>
                       <textarea
-                        rows="3"
+                        rows="2"
                         value={quizAnswers[q.id] || ''}
-                        onChange={e => handleQuizChange(q.id, e.target.value)}
+                        onChange={e => setQuizAnswers({ ...quizAnswers, [q.id]: e.target.value })}
                         placeholder="Escreva sua resposta aqui..."
-                        className="w-full p-3 bg-palette-secondary/40 border border-palette-border rounded-xl text-sm focus:outline-none focus:border-palette-primary text-palette-dark"
+                        className="w-full p-3 bg-palette-secondary/40 border border-palette-border rounded-xl text-sm focus:outline-none focus:border-palette-primary"
                       ></textarea>
                     </div>
                   ))}
                 </div>
 
+                {/* BOTÃO DE GERAR PDF DO QUIZ */}
                 <div className="bg-gradient-to-r from-palette-primary to-palette-accent p-6 rounded-3xl text-white flex flex-col md:flex-row items-center justify-between gap-4 shadow-md mt-8">
                   <div>
                     <h3 className="font-serif font-bold text-xl mb-1">Terminou de responder?</h3>
-                    <p className="text-xs opacity-90">Baixe o PDF do seu Quiz e envie para o seu amigo/a comparar!</p>
+                    <p className="text-xs opacity-90">Baixe o PDF com as suas respostas do Quiz e envie para o seu par no WhatsApp!</p>
                   </div>
                   <button
                     onClick={generateQuizPDF}
@@ -869,7 +865,7 @@
             )}
           </main>
 
-          {/* TEMPLATE DO PDF DO FORMULÁRIO */}
+          {/* TEMPLATE DO PDF DE PREFERÊNCIAS */}
           <div id="pdf-template" style={{ display: 'none', padding: '20px', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
             <div style={{ textAlign: 'center', borderBottom: '2px solid #D35400', paddingBottom: '15px', marginBottom: '20px' }}>
               <span style={{ fontSize: '10px', color: '#D35400', textTransform: 'uppercase', fontWeight: 'bold' }}>Guia de Experiências & Encontros</span>
@@ -881,15 +877,15 @@
           {/* TEMPLATE DO PDF DO QUIZ */}
           <div id="quiz-pdf-template" style={{ display: 'none', padding: '20px', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
             <div style={{ textAlign: 'center', borderBottom: '2px solid #D35400', paddingBottom: '15px', marginBottom: '20px' }}>
-              <span style={{ fontSize: '10px', color: '#D35400', textTransform: 'uppercase', fontWeight: 'bold' }}>Conversa e Intimidade Leve</span>
+              <span style={{ fontSize: '10px', color: '#D35400', textTransform: 'uppercase', fontWeight: 'bold' }}>Guia de Experiências & Encontros</span>
               <h1 style={{ fontFamily: 'Playfair Display, serif', color: '#4A235A', fontSize: '24px', margin: '5px 0' }}>Quiz de Conexão</h1>
               <p style={{ fontSize: '14px', color: '#D35400', fontWeight: 'bold', margin: 0 }}>Respostas de: {userProfileName || 'Anônimo'}</p>
             </div>
 
             {INITIAL_QUIZ_QUESTIONS.map(q => (
-              <div key={q.id} style={{ marginBottom: '15px', padding: '12px', backgroundColor: '#FAF6F0', borderRadius: '8px', border: '1px solid #EADCD7' }}>
-                <h3 style={{ fontSize: '12px', color: '#D35400', fontWeight: 'bold', margin: '0 0 5px 0' }}>{q.question}</h3>
-                <p style={{ fontSize: '13px', color: '#4A235A', margin: 0, whiteSpace: 'pre-wrap' }}>{quizAnswers[q.id] || '(Não respondido)'}</p>
+              <div key={q.id} style={{ marginBottom: '15px', padding: '10px', backgroundColor: '#FAF6F0', borderRadius: '8px', border: '1px solid #EADCD7' }}>
+                <p style={{ fontSize: '12px', color: '#D35400', fontWeight: 'bold', margin: '0 0 5px 0' }}>{q.question}</p>
+                <p style={{ fontSize: '12px', color: '#4A235A', margin: 0, whiteSpace: 'pre-wrap' }}>{quizAnswers[q.id] || '(Não respondido)'}</p>
               </div>
             ))}
           </div>
