@@ -172,6 +172,17 @@
       }
     ];
 
+    const QUIZ_QUESTIONS = [
+      { id: 'q1', question: 'Qual lugar da sua infância ou adolescência você adoraria me levar para conhecer?' },
+      { id: 'q2', question: 'Qual é a recordação mais feliz ou engraçada que você tem dos últimos tempos?' },
+      { id: 'q3', question: 'Se tivéssemos um dia inteiro livre e sem orçamento limite, o que faríamos?' },
+      { id: 'q4', question: 'Qual pequena mania ou detalhe em alguém costuma te conquistar de imediato?' },
+      { id: 'q5', question: 'Qual é o prato ou sabor de comida que te traz sensação imediata de aconchego?' },
+      { id: 'q6', question: 'Se pudéssemos viajar para qualquer lugar amanhã sem avisar ninguém, para onde iríamos?' },
+      { id: 'q7', question: 'Qual foi o elogio mais marcante ou especial que você já recebeu na vida?' },
+      { id: 'q8', question: 'O que nunca pode faltar em um domingo perfeito para você?' }
+    ];
+
     const INITIAL_MEETINGS = Array.from({ length: 12 }, (_, i) => ({
       number: i + 1,
       title: `Encontro ${String(i + 1).padStart(2, '0')}`,
@@ -197,6 +208,11 @@
 
       const [ratings, setRatings] = useState(() => {
         const saved = localStorage.getItem('guia_ratings');
+        return saved ? JSON.parse(saved) : {};
+      });
+
+      const [quizAnswers, setQuizAnswers] = useState(() => {
+        const saved = localStorage.getItem('guia_quiz');
         return saved ? JSON.parse(saved) : {};
       });
 
@@ -231,6 +247,10 @@
       useEffect(() => {
         localStorage.setItem('guia_ratings', JSON.stringify(ratings));
       }, [ratings]);
+
+      useEffect(() => {
+        localStorage.setItem('guia_quiz', JSON.stringify(quizAnswers));
+      }, [quizAnswers]);
 
       useEffect(() => {
         localStorage.setItem('guia_meetings', JSON.stringify(meetings));
@@ -278,6 +298,13 @@
         }));
       };
 
+      const handleQuizAnswer = (qId, val) => {
+        setQuizAnswers(prev => ({
+          ...prev,
+          [qId]: val
+        }));
+      };
+
       const handleMeetingUpdate = (updatedMeeting) => {
         setMeetings(prev => prev.map(m => m.number === updatedMeeting.number ? updatedMeeting : m));
       };
@@ -287,6 +314,22 @@
         const opt = {
           margin:       0.5,
           filename:     `Preferencias_Encontros_${userProfileName || 'MeuPerfil'}.pdf`,
+          image:        { type: 'jpeg', quality: 0.98 },
+          html2canvas:  { scale: 2 },
+          jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+        };
+        
+        element.style.display = 'block';
+        window.html2pdf().set(opt).from(element).save().then(() => {
+          element.style.display = 'none';
+        });
+      };
+
+      const generateQuizPDF = () => {
+        const element = document.getElementById('pdf-quiz-template');
+        const opt = {
+          margin:       0.5,
+          filename:     `Quiz_Afinidade_${userProfileName || 'MeuPerfil'}.pdf`,
           image:        { type: 'jpeg', quality: 0.98 },
           html2canvas:  { scale: 2 },
           jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
@@ -329,7 +372,7 @@
             {[
               { id: 'home', label: 'Introdução' },
               { id: 'form', label: 'Formulário' },
-              { id: 'ideas', label: 'Banco de Ideias' },
+              { id: 'quiz', label: 'Quiz de Afinidade' },
               { id: 'meetings', label: '12 Encontros' },
               { id: 'memories', label: 'Memórias' }
             ].map(tab => (
@@ -566,33 +609,72 @@
               </div>
             )}
 
-            {activeTab === 'ideas' && (
+            {activeTab === 'quiz' && (
               <div className="bg-white p-6 md:p-8 rounded-3xl border border-palette-border shadow-sm space-y-6">
-                <div>
-                  <h2 className="font-serif text-2xl font-bold text-palette-dark">
-                    Banco de Ideias para Inspirar
-                  </h2>
-                  <p className="text-sm text-palette-dark/60">
-                    Use estas sugestões diretamente no planejamento do seu próximo encontro.
-                  </p>
+                <div className="flex flex-col md:flex-row justify-between items-center gap-4 border-b border-palette-border pb-6">
+                  <div>
+                    <span className="text-xs font-semibold text-palette-primary uppercase tracking-widest">
+                      Conexão e Intimidade
+                    </span>
+                    <h2 className="font-serif text-2xl md:text-3xl font-bold text-palette-dark">
+                      Quiz de Afinidade
+                    </h2>
+                    <p className="text-sm text-palette-dark/60 mt-1">
+                      Perguntas leves e especiais para se conhecerem ainda mais intimamente. Responda e gere um PDF para partilhar!
+                    </p>
+                  </div>
+
+                  <div className="w-full md:w-auto bg-palette-secondary p-3 rounded-2xl border border-palette-border flex items-center gap-2">
+                    <label className="text-xs font-bold text-palette-dark whitespace-nowrap">
+                      Meu Nome:
+                    </label>
+                    <input
+                      type="text"
+                      value={userProfileName}
+                      onChange={e => setUserProfileName(e.target.value)}
+                      placeholder="Digite seu nome"
+                      className="p-2 bg-white border border-palette-border rounded-xl text-xs font-bold text-palette-primary focus:outline-none w-full"
+                    />
+                  </div>
                 </div>
 
-                <div className="grid md:grid-cols-2 gap-6">
-                  {CATEGORIES.map(cat => (
-                    <div key={cat.id} className="p-5 bg-palette-secondary/40 rounded-2xl border border-palette-border">
-                      <h3 className="font-serif font-bold text-lg text-palette-primary mb-3 pb-2 border-b border-palette-border">
-                        {cat.title}
-                      </h3>
-                      <ul className="space-y-2">
-                        {cat.items.map((item, idx) => (
-                          <li key={idx} className="text-sm text-palette-dark/80 flex items-start gap-2">
-                            <span className="text-palette-primary font-bold">•</span>
-                            <span>{item}</span>
-                          </li>
-                        ))}
-                      </ul>
+                <div className="space-y-6">
+                  {QUIZ_QUESTIONS.map((q, idx) => (
+                    <div key={q.id} className="p-5 bg-palette-secondary/30 border border-palette-border rounded-2xl space-y-3">
+                      <div className="flex items-start gap-3">
+                        <span className="flex items-center justify-center bg-palette-primary text-white rounded-full w-7 h-7 text-xs font-bold shrink-0">
+                          {idx + 1}
+                        </span>
+                        <h3 className="font-serif font-bold text-palette-dark text-base pt-0.5">
+                          {q.question}
+                        </h3>
+                      </div>
+                      <textarea
+                        rows="2"
+                        value={quizAnswers[q.id] || ''}
+                        onChange={e => handleQuizAnswer(q.id, e.target.value)}
+                        placeholder="Escreva sua resposta com carinho aqui..."
+                        className="w-full p-3 bg-white border border-palette-border rounded-xl text-sm focus:outline-none focus:border-palette-primary text-palette-dark"
+                      ></textarea>
                     </div>
                   ))}
+                </div>
+
+                <div className="bg-gradient-to-r from-palette-primary to-palette-accent p-6 rounded-3xl text-white flex flex-col md:flex-row items-center justify-between gap-4 shadow-md mt-8">
+                  <div>
+                    <h3 className="font-serif font-bold text-xl mb-1">
+                      Terminou de responder o quiz?
+                    </h3>
+                    <p className="text-xs opacity-90">
+                      Gere o PDF das suas respostas para enviar ao seu par e conversarem sobre cada detalhe!
+                    </p>
+                  </div>
+                  <button
+                    onClick={generateQuizPDF}
+                    className="px-6 py-3 bg-white text-palette-primary font-bold rounded-2xl hover:bg-palette-secondary transition text-sm shadow-md whitespace-nowrap"
+                  >
+                    Baixar PDF do Quiz
+                  </button>
                 </div>
               </div>
             )}
@@ -980,7 +1062,7 @@
                         </label>
                         <textarea
                           rows="2"
-                          disabled={timeCapsule.isSealed || (!allMeetingsCompleted && timeCapsule.openDate === 'Conclusão dos 12 Encontros' && timeCapsule.isSealed)}
+                          disabled={timeCapsule.isSealed}
                           value={timeCapsule.dreamDestination}
                           onChange={e => setTimeCapsule({ ...timeCapsule, dreamDestination: e.target.value })}
                           placeholder="Ex: Viajar para a serra ou conhecer a praia X..."
@@ -1043,7 +1125,7 @@
             )}
           </main>
 
-          {/* TEMPLATE DO PDF ESCONDIDO */}
+          {/* TEMPLATE DO PDF DO FORMULÁRIO */}
           <div id="pdf-template" style={{ display: 'none', padding: '20px', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
             <div style={{ textAlign: 'center', borderBottom: '2px solid #D35400', paddingBottom: '15px', marginBottom: '20px' }}>
               <span style={{ fontSize: '10px', color: '#D35400', textTransform: 'uppercase', fontWeight: 'bold' }}>
@@ -1076,6 +1158,32 @@
                     );
                   })}
                 </div>
+              </div>
+            ))}
+          </div>
+
+          {/* TEMPLATE DO PDF DO QUIZ */}
+          <div id="pdf-quiz-template" style={{ display: 'none', padding: '20px', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
+            <div style={{ textAlign: 'center', borderBottom: '2px solid #D35400', paddingBottom: '15px', marginBottom: '20px' }}>
+              <span style={{ fontSize: '10px', color: '#D35400', textTransform: 'uppercase', fontWeight: 'bold' }}>
+                Quiz de Afinidade & Conexão
+              </span>
+              <h1 style={{ fontFamily: 'Playfair Display, serif', color: '#4A235A', fontSize: '24px', margin: '5px 0' }}>
+                Aventura, Leveza e Companhia
+              </h1>
+              <p style={{ fontSize: '14px', color: '#D35400', fontWeight: 'bold', margin: 0 }}>
+                Respostas de: {userProfileName || 'Anônimo'}
+              </p>
+            </div>
+
+            {QUIZ_QUESTIONS.map((q, idx) => (
+              <div key={q.id} style={{ marginBottom: '15px', padding: '10px', backgroundColor: '#FAF6F0', borderRadius: '8px', border: '1px solid #EADCD7' }}>
+                <p style={{ fontSize: '12px', fontWeight: 'bold', color: '#4A235A', marginBottom: '6px' }}>
+                  {idx + 1}. {q.question}
+                </p>
+                <p style={{ fontSize: '12px', color: '#D35400', fontStyle: 'italic', margin: 0 }}>
+                  {quizAnswers[q.id] ? `"${quizAnswers[q.id]}"` : '(Não respondido)'}
+                </p>
               </div>
             ))}
           </div>
