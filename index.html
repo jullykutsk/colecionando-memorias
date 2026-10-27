@@ -205,7 +205,11 @@
         return saved ? JSON.parse(saved) : { person1: {}, person2: {} };
       });
 
+      // Controla qual perfil está sendo editado e qual está sendo visualizado
       const [activePerson, setActivePerson] = useState('person1');
+      const [viewMode, setViewMode] = useState('edit'); // 'edit' ou 'view'
+      const [viewTargetPerson, setViewTargetPerson] = useState('person2');
+
       const [meetings, setMeetings] = useState(() => {
         const saved = localStorage.getItem('guia_meetings');
         return saved ? JSON.parse(saved) : INITIAL_MEETINGS;
@@ -264,6 +268,7 @@
       });
 
       const handleRating = (itemKey, stars) => {
+        if (viewMode === 'view') return; // Se estiver apenas visualizando o outro, não deixa alterar
         setRatings(prev => ({
           ...prev,
           [activePerson]: {
@@ -278,6 +283,10 @@
       };
 
       const completedCount = meetings.filter(m => m.status === 'completed').length;
+
+      // Define de quem é o perfil exibido no formulário neste momento
+      const displayedPerson = viewMode === 'edit' ? activePerson : viewTargetPerson;
+      const displayedPersonName = displayedPerson === 'person1' ? names.person1 : names.person2;
 
       return (
         <div className="max-w-4xl mx-auto px-4 py-6">
@@ -403,7 +412,7 @@
 
                   {rouletteWinner && !isSpinning && (
                     <div className="p-3 bg-palette-primary text-white rounded-xl font-bold text-lg animate-bounce shadow-md inline-block px-6">
-                      ✨ {rouletteWinner} começa! ✨
+                      {rouletteWinner} começa!
                     </div>
                   )}
 
@@ -447,36 +456,62 @@
                     </p>
                   </div>
 
-                  <div className="flex bg-palette-secondary p-1.5 rounded-2xl border border-palette-border w-full md:w-auto justify-center gap-2">
-                    <button
-                      onClick={() => setActivePerson('person1')}
-                      className={`px-4 py-2 rounded-xl text-xs md:text-sm font-semibold transition ${
-                        activePerson === 'person1'
-                          ? 'bg-palette-primary text-white shadow-sm'
-                          : 'text-palette-dark/70 hover:text-palette-dark'
-                      }`}
-                    >
-                      {names.person1}
-                    </button>
-                    <button
-                      onClick={() => setActivePerson('person2')}
-                      className={`px-4 py-2 rounded-xl text-xs md:text-sm font-semibold transition ${
-                        activePerson === 'person2'
-                          ? 'bg-palette-primary text-white shadow-sm'
-                          : 'text-palette-dark/70 hover:text-palette-dark'
-                      }`}
-                    >
-                      {names.person2}
-                    </button>
+                  {/* SELEÇÃO DE QUEM ESTÁ A EDITAR OU A VER */}
+                  <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
+                    <div className="flex bg-palette-secondary p-1.5 rounded-2xl border border-palette-border justify-center gap-1">
+                      <button
+                        onClick={() => { setActivePerson('person1'); setViewMode('edit'); }}
+                        className={`px-3 py-2 rounded-xl text-xs md:text-sm font-semibold transition ${
+                          viewMode === 'edit' && activePerson === 'person1'
+                            ? 'bg-palette-primary text-white shadow-sm'
+                            : 'text-palette-dark/70 hover:text-palette-dark'
+                        }`}
+                      >
+                        Editar {names.person1}
+                      </button>
+                      <button
+                        onClick={() => { setActivePerson('person2'); setViewMode('edit'); }}
+                        className={`px-3 py-2 rounded-xl text-xs md:text-sm font-semibold transition ${
+                          viewMode === 'edit' && activePerson === 'person2'
+                            ? 'bg-palette-primary text-white shadow-sm'
+                            : 'text-palette-dark/70 hover:text-palette-dark'
+                        }`}
+                      >
+                        Editar {names.person2}
+                      </button>
+                    </div>
+
+                    <div className="flex bg-palette-secondary p-1.5 rounded-2xl border border-palette-border justify-center gap-1">
+                      <button
+                        onClick={() => { setViewMode('view'); setViewTargetPerson('person1'); }}
+                        className={`px-3 py-2 rounded-xl text-xs md:text-sm font-semibold transition ${
+                          viewMode === 'view' && viewTargetPerson === 'person1'
+                            ? 'bg-palette-dark text-white shadow-sm'
+                            : 'text-palette-dark/70 hover:text-palette-dark'
+                        }`}
+                      >
+                        Ver {names.person1}
+                      </button>
+                      <button
+                        onClick={() => { setViewMode('view'); setViewTargetPerson('person2'); }}
+                        className={`px-3 py-2 rounded-xl text-xs md:text-sm font-semibold transition ${
+                          viewMode === 'view' && viewTargetPerson === 'person2'
+                            ? 'bg-palette-dark text-white shadow-sm'
+                            : 'text-palette-dark/70 hover:text-palette-dark'
+                        }`}
+                      >
+                        Ver {names.person2}
+                      </button>
+                    </div>
                   </div>
                 </div>
 
-                <div className="bg-palette-secondary/50 p-4 rounded-2xl border border-palette-border text-center">
-                  <span className="text-xs font-semibold text-palette-primary uppercase tracking-wider">
-                    A avaliar no momento:
+                <div className={`p-4 rounded-2xl border text-center ${viewMode === 'edit' ? 'bg-palette-secondary/50 border-palette-border' : 'bg-amber-50 border-amber-200'}`}>
+                  <span className="text-xs font-semibold uppercase tracking-wider block mb-1">
+                    {viewMode === 'edit' ? 'A avaliar no momento:' : 'Modo de Visualização:'}
                   </span>
                   <p className="text-base font-bold text-palette-dark">
-                    👤 Perfil de {activePerson === 'person1' ? names.person1 : names.person2}
+                    Perfil de {displayedPersonName} {viewMode === 'view' ? '(Somente Leitura)' : ''}
                   </p>
                 </div>
 
@@ -487,7 +522,7 @@
                     
                     const ratedCount = cat.items.filter((_, idx) => {
                       const itemKey = `${cat.id}_${idx}`;
-                      return (ratings[activePerson]?.[itemKey] || 0) > 0;
+                      return (ratings[displayedPerson]?.[itemKey] || 0) > 0;
                     }).length;
 
                     return (
@@ -513,7 +548,7 @@
                           <div className="p-6 grid md:grid-cols-2 gap-4 border-t border-palette-border bg-white">
                             {cat.items.map((item, idx) => {
                               const itemKey = `${cat.id}_${idx}`;
-                              const currentStar = ratings[activePerson]?.[itemKey] || 0;
+                              const currentStar = ratings[displayedPerson]?.[itemKey] || 0;
 
                               return (
                                 <div key={idx} className="p-4 rounded-2xl border flex flex-col justify-between bg-palette-secondary/30 border-palette-border/60">
@@ -525,8 +560,9 @@
                                     {[1, 2, 3, 4, 5].map(star => (
                                       <button
                                         key={star}
+                                        disabled={viewMode === 'view'}
                                         onClick={() => handleRating(itemKey, star)}
-                                        className={`text-2xl transition-transform hover:scale-125 ${
+                                        className={`text-2xl transition-transform ${viewMode === 'edit' ? 'hover:scale-125 cursor-pointer' : 'cursor-default'} ${
                                           star <= currentStar ? 'text-amber-500' : 'text-gray-300'
                                         }`}
                                       >
@@ -551,7 +587,7 @@
                 <div className="bg-white p-6 md:p-8 rounded-3xl border border-palette-border shadow-sm space-y-4">
                   <div>
                     <h3 className="font-serif font-bold text-2xl text-palette-dark mb-1">
-                      Tabela de Afinidades em Comum ✨
+                      Tabela de Afinidades em Comum
                     </h3>
                     <p className="text-sm text-palette-dark/60">
                       Aqui aparecem automaticamente as atividades que ambos avaliaram com nota alta (4 ou 5 estrelas).
@@ -575,7 +611,7 @@
                       if (matches.length === 0) {
                         return (
                           <div className="text-center py-10 text-palette-dark/50 italic bg-palette-secondary/30 rounded-2xl border border-dashed border-palette-border p-6">
-                            Nenhuma coincidência (notas 4 ou 5 de ambos) encontrada ainda. Continuem a avaliar as atividades! 🌟
+                            Nenhuma coincidência (notas 4 ou 5 de ambos) encontrada ainda. Continuem a avaliar as atividades!
                           </div>
                         );
                       }
