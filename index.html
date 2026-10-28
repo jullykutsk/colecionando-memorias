@@ -311,40 +311,30 @@
 
       const generatePDF = () => {
         const element = document.getElementById('pdf-template');
-        element.style.display = 'block';
         
         const opt = {
-          margin:       [0.4, 0.4, 0.4, 0.4],
+          margin:       0.4,
           filename:     `Preferencias_Encontros_${userProfileName || 'MeuPerfil'}.pdf`,
           image:        { type: 'jpeg', quality: 0.98 },
-          html2canvas:  { scale: 1.5, useCORS: true, letterRendering: true },
+          html2canvas:  { scale: 2, useCORS: true, logging: false },
           jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
         };
         
-        setTimeout(() => {
-          window.html2pdf().set(opt).from(element).save().then(() => {
-            element.style.display = 'none';
-          });
-        }, 300);
+        window.html2pdf().set(opt).from(element).save();
       };
 
       const generateQuizPDF = () => {
         const element = document.getElementById('pdf-quiz-template');
-        element.style.display = 'block';
         
         const opt = {
-          margin:       [0.4, 0.4, 0.4, 0.4],
+          margin:       0.4,
           filename:     `Quiz_Afinidade_${userProfileName || 'MeuPerfil'}.pdf`,
           image:        { type: 'jpeg', quality: 0.98 },
-          html2canvas:  { scale: 1.5, useCORS: true, letterRendering: true },
+          html2canvas:  { scale: 2, useCORS: true, logging: false },
           jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
         };
         
-        setTimeout(() => {
-          window.html2pdf().set(opt).from(element).save().then(() => {
-            element.style.display = 'none';
-          });
-        }, 300);
+        window.html2pdf().set(opt).from(element).save();
       };
 
       const completedCount = meetings.filter(m => m.status === 'completed').length;
@@ -1131,67 +1121,71 @@
             )}
           </main>
 
-          {/* TEMPLATE DO PDF DO FORMULÁRIO (OTIMIZADO) */}
-          <div id="pdf-template" style={{ display: 'none', padding: '15px', background: '#FFFFFF', color: '#4A235A', fontFamily: 'Plus Jakarta Sans, sans-serif', width: '700px' }}>
-            <div style={{ textAlign: 'center', borderBottom: '2px solid #D35400', paddingBottom: '12px', marginBottom: '15px' }}>
-              <span style={{ fontSize: '9px', color: '#D35400', textTransform: 'uppercase', fontWeight: 'bold' }}>
-                Guia de Experiências & Encontros
-              </span>
-              <h1 style={{ fontFamily: 'Playfair Display, serif', color: '#4A235A', fontSize: '20px', margin: '4px 0' }}>
-                Aventura, Leveza e Companhia
-              </h1>
-              <p style={{ fontSize: '12px', color: '#D35400', fontWeight: 'bold', margin: 0 }}>
-                Perfil de Preferências: {userProfileName || 'Anônimo'}
-              </p>
-            </div>
-
-            {CATEGORIES.map(cat => (
-              <div key={cat.id} style={{ marginBottom: '12px', pageBreakInside: 'avoid' }}>
-                <h3 style={{ fontSize: '12px', color: '#D35400', borderBottom: '1px solid #EADCD7', paddingBottom: '3px', margin: '8px 0 6px 0', fontWeight: 'bold' }}>
-                  {cat.title}
-                </h3>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
-                  {cat.items.map((item, idx) => {
-                    const key = `${cat.id}_${idx}`;
-                    const score = ratings[key] || 0;
-                    return (
-                      <div key={idx} style={{ padding: '5px 8px', backgroundColor: '#FAF6F0', borderRadius: '6px', border: '1px solid #EADCD7', fontSize: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ paddingRight: '5px' }}>{item}</span>
-                        <strong style={{ color: score >= 4 ? '#D35400' : '#4A235A', whiteSpace: 'nowrap' }}>
-                          {score > 0 ? `${score} ★` : '-'}
-                        </strong>
-                      </div>
-                    );
-                  })}
-                </div>
+          {/* TEMPLATE DO PDF DO FORMULÁRIO (RENDERIZADO DIRETAMENTE SEM DISPLAY NONE) */}
+          <div style={{ position: 'absolute', left: '-9999px', top: 0, width: '750px' }}>
+            <div id="pdf-template" style={{ padding: '20px', background: '#FFFFFF', color: '#4A235A', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
+              <div style={{ textAlign: 'center', borderBottom: '2px solid #D35400', paddingBottom: '15px', marginBottom: '20px' }}>
+                <span style={{ fontSize: '10px', color: '#D35400', textTransform: 'uppercase', fontWeight: 'bold' }}>
+                  Guia de Experiências & Encontros
+                </span>
+                <h1 style={{ fontFamily: 'Playfair Display, serif', color: '#4A235A', fontSize: '24px', margin: '5px 0' }}>
+                  Aventura, Leveza e Companhia
+                </h1>
+                <p style={{ fontSize: '14px', color: '#D35400', fontWeight: 'bold', margin: 0 }}>
+                  Perfil de Preferências: {userProfileName || 'Anônimo'}
+                </p>
               </div>
-            ))}
+
+              {CATEGORIES.map(cat => (
+                <div key={cat.id} style={{ marginBottom: '16px' }}>
+                  <h3 style={{ fontSize: '14px', color: '#D35400', borderBottom: '1px solid #EADCD7', paddingBottom: '4px', margin: '10px 0 8px 0', fontWeight: 'bold' }}>
+                    {cat.title}
+                  </h3>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                    {cat.items.map((item, idx) => {
+                      const key = `${cat.id}_${idx}`;
+                      const score = ratings[key] || 0;
+                      return (
+                        <div key={idx} style={{ padding: '6px 10px', backgroundColor: '#FAF6F0', borderRadius: '6px', border: '1px solid #EADCD7', fontSize: '11px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span>{item}</span>
+                          <strong style={{ color: score >= 4 ? '#D35400' : '#4A235A' }}>
+                            {score > 0 ? `${score} ★` : '-'}
+                          </strong>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
 
-          {/* TEMPLATE DO PDF DO QUIZ (OTIMIZADO) */}
-          <div id="pdf-quiz-template" style={{ display: 'none', padding: '15px', background: '#FFFFFF', color: '#4A235A', fontFamily: 'Plus Jakarta Sans, sans-serif', width: '700px' }}>
-            <div style={{ textAlign: 'center', borderBottom: '2px solid #D35400', paddingBottom: '12px', marginBottom: '15px' }}>
-              <span style={{ fontSize: '9px', color: '#D35400', textTransform: 'uppercase', fontWeight: 'bold' }}>
-                Quiz de Afinidade & Conexão
-              </span>
-              <h1 style={{ fontFamily: 'Playfair Display, serif', color: '#4A235A', fontSize: '20px', margin: '4px 0' }}>
-                Aventura, Leveza e Companhia
-              </h1>
-              <p style={{ fontSize: '12px', color: '#D35400', fontWeight: 'bold', margin: 0 }}>
-                Respostas de: {userProfileName || 'Anônimo'}
-              </p>
-            </div>
-
-            {QUIZ_QUESTIONS.map((q, idx) => (
-              <div key={q.id} style={{ marginBottom: '12px', padding: '10px', backgroundColor: '#FAF6F0', borderRadius: '8px', border: '1px solid #EADCD7', pageBreakInside: 'avoid' }}>
-                <p style={{ fontSize: '11px', fontWeight: 'bold', color: '#4A235A', marginBottom: '4px' }}>
-                  {idx + 1}. {q.question}
-                </p>
-                <p style={{ fontSize: '11px', color: '#D35400', fontStyle: 'italic', margin: 0 }}>
-                  {quizAnswers[q.id] ? `"${quizAnswers[q.id]}"` : '(Não respondido)'}
+          {/* TEMPLATE DO PDF DO QUIZ (RENDERIZADO DIRETAMENTE SEM DISPLAY NONE) */}
+          <div style={{ position: 'absolute', left: '-9999px', top: 0, width: '750px' }}>
+            <div id="pdf-quiz-template" style={{ padding: '20px', background: '#FFFFFF', color: '#4A235A', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
+              <div style={{ textAlign: 'center', borderBottom: '2px solid #D35400', paddingBottom: '15px', marginBottom: '20px' }}>
+                <span style={{ fontSize: '10px', color: '#D35400', textTransform: 'uppercase', fontWeight: 'bold' }}>
+                  Quiz de Afinidade & Conexão
+                </span>
+                <h1 style={{ fontFamily: 'Playfair Display, serif', color: '#4A235A', fontSize: '24px', margin: '5px 0' }}>
+                  Aventura, Leveza e Companhia
+                </h1>
+                <p style={{ fontSize: '14px', color: '#D35400', fontWeight: 'bold', margin: 0 }}>
+                  Respostas de: {userProfileName || 'Anônimo'}
                 </p>
               </div>
-            ))}
+
+              {QUIZ_QUESTIONS.map((q, idx) => (
+                <div key={q.id} style={{ marginBottom: '14px', padding: '12px', backgroundColor: '#FAF6F0', borderRadius: '8px', border: '1px solid #EADCD7' }}>
+                  <p style={{ fontSize: '12px', fontWeight: 'bold', color: '#4A235A', marginBottom: '6px' }}>
+                    {idx + 1}. {q.question}
+                  </p>
+                  <p style={{ fontSize: '12px', color: '#D35400', fontStyle: 'italic', margin: 0 }}>
+                    {quizAnswers[q.id] ? `"${quizAnswers[q.id]}"` : '(Não respondido)'}
+                  </p>
+                </div>
+              ))}
+            </div>
           </div>
 
         </div>
