@@ -311,34 +311,40 @@
 
       const generatePDF = () => {
         const element = document.getElementById('pdf-template');
+        element.style.display = 'block';
+        
         const opt = {
           margin:       0.5,
           filename:     `Preferencias_Encontros_${userProfileName || 'MeuPerfil'}.pdf`,
           image:        { type: 'jpeg', quality: 0.98 },
-          html2canvas:  { scale: 2 },
+          html2canvas:  { scale: 2, useCORS: true },
           jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
         };
         
-        element.style.display = 'block';
-        window.html2pdf().set(opt).from(element).save().then(() => {
-          element.style.display = 'none';
-        });
+        setTimeout(() => {
+          window.html2pdf().set(opt).from(element).save().then(() => {
+            element.style.display = 'none';
+          });
+        }, 200);
       };
 
       const generateQuizPDF = () => {
         const element = document.getElementById('pdf-quiz-template');
+        element.style.display = 'block';
+        
         const opt = {
           margin:       0.5,
           filename:     `Quiz_Afinidade_${userProfileName || 'MeuPerfil'}.pdf`,
           image:        { type: 'jpeg', quality: 0.98 },
-          html2canvas:  { scale: 2 },
+          html2canvas:  { scale: 2, useCORS: true },
           jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
         };
         
-        element.style.display = 'block';
-        window.html2pdf().set(opt).from(element).save().then(() => {
-          element.style.display = 'none';
-        });
+        setTimeout(() => {
+          window.html2pdf().set(opt).from(element).save().then(() => {
+            element.style.display = 'none';
+          });
+        }, 200);
       };
 
       const completedCount = meetings.filter(m => m.status === 'completed').length;
@@ -368,7 +374,6 @@
             </div>
           </header>
 
-          {/* MENU RESPONSIVO COM SCROLL HORIZONTAL SUAVE E SEM CORTAR */}
           <nav className="flex justify-start md:justify-center gap-2 mb-8 overflow-x-auto pb-3 pt-1 px-1 scrollbar-thin">
             {[
               { id: 'home', label: 'Introdução' },
@@ -1127,7 +1132,7 @@
           </main>
 
           {/* TEMPLATE DO PDF DO FORMULÁRIO */}
-          <div id="pdf-template" style={{ display: 'none', padding: '20px', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
+          <div id="pdf-template" style={{ display: 'none', padding: '20px', background: '#FFFFFF', color: '#4A235A', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
             <div style={{ textAlign: 'center', borderBottom: '2px solid #D35400', paddingBottom: '15px', marginBottom: '20px' }}>
               <span style={{ fontSize: '10px', color: '#D35400', textTransform: 'uppercase', fontWeight: 'bold' }}>
                 Guia de Experiências & Encontros
@@ -1164,7 +1169,7 @@
           </div>
 
           {/* TEMPLATE DO PDF DO QUIZ */}
-          <div id="pdf-quiz-template" style={{ display: 'none', padding: '20px', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
+          <div id="pdf-quiz-template" style={{ display: 'none', padding: '20px', background: '#FFFFFF', color: '#4A235A', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
             <div style={{ textAlign: 'center', borderBottom: '2px solid #D35400', paddingBottom: '15px', marginBottom: '20px' }}>
               <span style={{ fontSize: '10px', color: '#D35400', textTransform: 'uppercase', fontWeight: 'bold' }}>
                 Quiz de Afinidade & Conexão
