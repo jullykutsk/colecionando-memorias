@@ -20,7 +20,7 @@
   <!-- Babel para compilar JSX no navegador -->
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   
-  <!-- html2pdf.js para gerar o PDF bonitão direto pelo navegador -->
+  <!-- html2pdf.js para gerar o PDF direto pelo navegador -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
   <script>
@@ -311,29 +311,25 @@
 
       const generatePDF = () => {
         const element = document.getElementById('pdf-template');
-        
         const opt = {
-          margin:       0.4,
+          margin:       [0.4, 0.4, 0.4, 0.4],
           filename:     `Preferencias_Encontros_${userProfileName || 'MeuPerfil'}.pdf`,
           image:        { type: 'jpeg', quality: 0.98 },
           html2canvas:  { scale: 2, useCORS: true, logging: false },
           jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
         };
-        
         window.html2pdf().set(opt).from(element).save();
       };
 
       const generateQuizPDF = () => {
         const element = document.getElementById('pdf-quiz-template');
-        
         const opt = {
-          margin:       0.4,
+          margin:       [0.4, 0.4, 0.4, 0.4],
           filename:     `Quiz_Afinidade_${userProfileName || 'MeuPerfil'}.pdf`,
           image:        { type: 'jpeg', quality: 0.98 },
           html2canvas:  { scale: 2, useCORS: true, logging: false },
           jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
         };
-        
         window.html2pdf().set(opt).from(element).save();
       };
 
@@ -389,7 +385,6 @@
           <main>
             {activeTab === 'home' && (
               <div className="bg-white p-6 md:p-8 rounded-3xl border border-palette-border shadow-sm space-y-6">
-                
                 <div className="my-2 space-y-4">
                   <div className="p-5 bg-palette-secondary/50 rounded-2xl border border-palette-border">
                     <h3 className="font-semibold text-palette-primary text-lg mb-2">
@@ -523,7 +518,6 @@
                 <div className="space-y-4">
                   {CATEGORIES.map(cat => {
                     const isOpen = !!openCategories[cat.id];
-                    
                     const ratedCount = cat.items.filter((_, idx) => {
                       const itemKey = `${cat.id}_${idx}`;
                       return (ratings[itemKey] || 0) > 0;
@@ -1121,34 +1115,34 @@
             )}
           </main>
 
-          {/* TEMPLATE DO PDF DO FORMULÁRIO (RENDERIZADO DIRETAMENTE SEM DISPLAY NONE) */}
-          <div style={{ position: 'absolute', left: '-9999px', top: 0, width: '750px' }}>
+          {/* TEMPLATE OCULTO DO PDF DO FORMULÁRIO */}
+          <div style={{ position: 'absolute', left: '-9999px', top: 0, width: '680px' }}>
             <div id="pdf-template" style={{ padding: '20px', background: '#FFFFFF', color: '#4A235A', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
-              <div style={{ textAlign: 'center', borderBottom: '2px solid #D35400', paddingBottom: '15px', marginBottom: '20px' }}>
+              <div style={{ textAlign: 'center', borderBottom: '2px solid #D35400', paddingBottom: '12px', marginBottom: '15px' }}>
                 <span style={{ fontSize: '10px', color: '#D35400', textTransform: 'uppercase', fontWeight: 'bold' }}>
                   Guia de Experiências & Encontros
                 </span>
-                <h1 style={{ fontFamily: 'Playfair Display, serif', color: '#4A235A', fontSize: '24px', margin: '5px 0' }}>
+                <h1 style={{ fontFamily: 'Playfair Display, serif', color: '#4A235A', fontSize: '22px', margin: '4px 0' }}>
                   Aventura, Leveza e Companhia
                 </h1>
-                <p style={{ fontSize: '14px', color: '#D35400', fontWeight: 'bold', margin: 0 }}>
+                <p style={{ fontSize: '13px', color: '#D35400', fontWeight: 'bold', margin: 0 }}>
                   Perfil de Preferências: {userProfileName || 'Anônimo'}
                 </p>
               </div>
 
               {CATEGORIES.map(cat => (
-                <div key={cat.id} style={{ marginBottom: '16px' }}>
-                  <h3 style={{ fontSize: '14px', color: '#D35400', borderBottom: '1px solid #EADCD7', paddingBottom: '4px', margin: '10px 0 8px 0', fontWeight: 'bold' }}>
+                <div key={cat.id} style={{ marginBottom: '12px', pageBreakInside: 'avoid', breakInside: 'avoid' }}>
+                  <h3 style={{ fontSize: '12px', color: '#D35400', borderBottom: '1px solid #EADCD7', paddingBottom: '3px', margin: '6px 0 6px 0', fontWeight: 'bold' }}>
                     {cat.title}
                   </h3>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
                     {cat.items.map((item, idx) => {
                       const key = `${cat.id}_${idx}`;
                       const score = ratings[key] || 0;
                       return (
-                        <div key={idx} style={{ padding: '6px 10px', backgroundColor: '#FAF6F0', borderRadius: '6px', border: '1px solid #EADCD7', fontSize: '11px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <span>{item}</span>
-                          <strong style={{ color: score >= 4 ? '#D35400' : '#4A235A' }}>
+                        <div key={idx} style={{ padding: '4px 8px', backgroundColor: '#FAF6F0', borderRadius: '6px', border: '1px solid #EADCD7', fontSize: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span style={{ paddingRight: '4px' }}>{item}</span>
+                          <strong style={{ color: score >= 4 ? '#D35400' : '#4A235A', whiteSpace: 'nowrap' }}>
                             {score > 0 ? `${score} ★` : '-'}
                           </strong>
                         </div>
@@ -1160,27 +1154,27 @@
             </div>
           </div>
 
-          {/* TEMPLATE DO PDF DO QUIZ (RENDERIZADO DIRETAMENTE SEM DISPLAY NONE) */}
-          <div style={{ position: 'absolute', left: '-9999px', top: 0, width: '750px' }}>
+          {/* TEMPLATE OCULTO DO PDF DO QUIZ */}
+          <div style={{ position: 'absolute', left: '-9999px', top: 0, width: '680px' }}>
             <div id="pdf-quiz-template" style={{ padding: '20px', background: '#FFFFFF', color: '#4A235A', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
-              <div style={{ textAlign: 'center', borderBottom: '2px solid #D35400', paddingBottom: '15px', marginBottom: '20px' }}>
+              <div style={{ textAlign: 'center', borderBottom: '2px solid #D35400', paddingBottom: '12px', marginBottom: '15px' }}>
                 <span style={{ fontSize: '10px', color: '#D35400', textTransform: 'uppercase', fontWeight: 'bold' }}>
                   Quiz de Afinidade & Conexão
                 </span>
-                <h1 style={{ fontFamily: 'Playfair Display, serif', color: '#4A235A', fontSize: '24px', margin: '5px 0' }}>
+                <h1 style={{ fontFamily: 'Playfair Display, serif', color: '#4A235A', fontSize: '22px', margin: '4px 0' }}>
                   Aventura, Leveza e Companhia
                 </h1>
-                <p style={{ fontSize: '14px', color: '#D35400', fontWeight: 'bold', margin: 0 }}>
+                <p style={{ fontSize: '13px', color: '#D35400', fontWeight: 'bold', margin: 0 }}>
                   Respostas de: {userProfileName || 'Anônimo'}
                 </p>
               </div>
 
               {QUIZ_QUESTIONS.map((q, idx) => (
-                <div key={q.id} style={{ marginBottom: '14px', padding: '12px', backgroundColor: '#FAF6F0', borderRadius: '8px', border: '1px solid #EADCD7' }}>
-                  <p style={{ fontSize: '12px', fontWeight: 'bold', color: '#4A235A', marginBottom: '6px' }}>
+                <div key={q.id} style={{ marginBottom: '12px', padding: '10px', backgroundColor: '#FAF6F0', borderRadius: '8px', border: '1px solid #EADCD7', pageBreakInside: 'avoid', breakInside: 'avoid' }}>
+                  <p style={{ fontSize: '11px', fontWeight: 'bold', color: '#4A235A', marginBottom: '4px' }}>
                     {idx + 1}. {q.question}
                   </p>
-                  <p style={{ fontSize: '12px', color: '#D35400', fontStyle: 'italic', margin: 0 }}>
+                  <p style={{ fontSize: '11px', color: '#D35400', fontStyle: 'italic', margin: 0 }}>
                     {quizAnswers[q.id] ? `"${quizAnswers[q.id]}"` : '(Não respondido)'}
                   </p>
                 </div>
