@@ -1,1192 +1,305 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Aventura, Leveza e Companhia</title>
-  
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  
-  <!-- Google Fonts (Playfair Display & Plus Jakarta Sans) -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  
-  <!-- React & ReactDOM -->
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-  
-  <!-- Babel para compilar JSX no navegador -->
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  
-  <!-- html2pdf.js para gerar o PDF direto pelo navegador -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: {
-            serif: ['Playfair Display', 'serif'],
-            sans: ['Plus Jakarta Sans', 'sans-serif'],
-          },
-          colors: {
-            palette: {
-              primary: '#D35400',
-              secondary: '#F5EEF0',
-              accent: '#E67E22',
-              dark: '#4A235A',
-              cardbg: '#FFFFFF',
-              border: '#EADCD7',
-              bg: '#FAF6F0'
-            }
-          }
-        }
-      }
-    }
-  </script>
-  
-  <style>
-    body {
-      background-color: #FAF6F0;
-      color: #4A235A;
-      font-family: 'Plus Jakarta Sans', sans-serif;
-    }
-    .paper-texture {
-      background-image: radial-gradient(#EADCD7 0.75px, transparent 0.75px);
-      background-size: 16px 16px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinControl Pro - Fatura Fechada & Raio-X</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #0f172a; color: #f8fafc; }
+    </style>
 </head>
-<body class="paper-texture min-h-screen pb-12">
+<body class="font-sans antialiased min-h-screen pb-12">
 
-  <div id="root"></div>
-
-  <script type="text/babel">
-    const { useState, useEffect } = React;
-
-    const CATEGORIES = [
-      {
-        id: 'A',
-        title: 'Natureza e Água',
-        items: [
-          'Tomar banho em uma cachoeira',
-          'Fazer uma trilha ao ar livre',
-          'Escalar uma montanha / mirante',
-          'Conhecer uma praia, rio ou lago',
-          'Passeio de caiaque ou pedalinho',
-          'Andar de barco',
-          'Fazer um piquenique ao ar livre',
-          'Acampar ou passar uma noite num lugar diferente',
-          'Observar as estrelas à noite',
-          'Fazer uma trilha no nascer ou pôr do sol'
-        ]
-      },
-      {
-        id: 'B',
-        title: 'Aventura e Novas Sensações',
-        items: [
-          'Fazer escalada indoor',
-          'Andar a cavalo',
-          'Fazer arvorismo ou tirolesa',
-          'Andar de kart',
-          'Experimentar um esporte novo',
-          'Visitar um parque de aventuras',
-          'Fazer um passeio de patinete / bike',
-          'Experimentar uma atividade de adrenalina',
-          'Fazer algo totalmente inédito'
-        ]
-      },
-      {
-        id: 'C',
-        title: 'Animais e Descobertas',
-        items: [
-          'Ter contato direto com animais',
-          'Visitar uma fazenda ou sítio',
-          'Conhecer um parque/santuário animal',
-          'Observar animais na natureza',
-          'Conhecer um local ou espécie nova de perto'
-        ]
-      },
-      {
-        id: 'D',
-        title: 'Cultura, Arte e Criatividade',
-        items: [
-          'Visitar um museu ou exposição',
-          'Ir ao teatro ou concerto',
-          'Assistir a um show ao vivo',
-          'Fazer oficina de cerâmica/argila',
-          'Experimentar pintura ou desenho',
-          'Fazer atividade de fotografia',
-          'Participar de uma aula de culinária',
-          'Fazer uma aula de dança juntos',
-          'Conhecer um lugar histórico',
-          'Visitar uma livraria ou biblioteca temática',
-          'Aprender uma habilidade nova juntos'
-        ]
-      },
-      {
-        id: 'E',
-        title: 'Jogos, Desafios e Diversão',
-        items: [
-          'Participar de um Escape Room',
-          'Jogar jogos de tabuleiro à tarde',
-          'Caça ao tesouro / enigmas',
-          'Jogar boliche',
-          'Ir a um fliperama / arcade',
-          'Jogo de perguntas e desafios íntimos',
-          'Fazer uma competição divertida',
-          'Desafio de trabalho em equipe'
-        ]
-      },
-      {
-        id: 'F',
-        title: 'Gastronomia e Experiências',
-        items: [
-          'Passeio gastronômico na cidade',
-          'Conhecer um restaurante exótico',
-          'Experimentar uma comida inédita',
-          'Cozinhar uma receita elaborada juntos',
-          'Degustação de doces ou tour de cafés',
-          'Visitar uma cafeteria temática',
-          'Preparar um jantar especial',
-          'Descobrir um cantinho escondido da cidade'
-        ]
-      },
-      {
-        id: 'G',
-        title: 'Encontros e Momentos Especiais',
-        items: [
-          'Passeio tranquilo sem pressa',
-          'Conversa profunda em um lugar bonito',
-          'Assistir ao pôr do sol juntos',
-          'Passeio surpresa de presente',
-          'Lugar novo sem saber os detalhes',
-          'Criar um projeto ou arte juntos',
-          'Atividade voluntária / solidária',
-          'Passar algumas horas sem celular',
-          'Passeio super econômico e criativo',
-          'Planejar uma experiência com significado'
-        ]
-      }
-    ];
-
-    const QUIZ_QUESTIONS = [
-      { id: 'q1', question: 'Qual lugar da sua infância ou adolescência você adoraria me levar para conhecer?' },
-      { id: 'q2', question: 'Qual é a recordação mais feliz ou engraçada que você tem dos últimos tempos?' },
-      { id: 'q3', question: 'Se tivéssemos um dia inteiro livre e sem orçamento limite, o que faríamos?' },
-      { id: 'q4', question: 'Qual pequena mania ou detalhe em alguém costuma te conquistar de imediato?' },
-      { id: 'q5', question: 'Qual é o prato ou sabor de comida que te traz sensação imediata de aconchego?' },
-      { id: 'q6', question: 'Se pudéssemos viajar para qualquer lugar amanhã sem avisar ninguém, para onde iríamos?' },
-      { id: 'q7', question: 'Qual foi o elogio mais marcante ou especial que você já recebeu na vida?' },
-      { id: 'q8', question: 'O que nunca pode faltar em um domingo perfeito para você?' }
-    ];
-
-    const INITIAL_MEETINGS = Array.from({ length: 12 }, (_, i) => ({
-      number: i + 1,
-      title: `Encontro ${String(i + 1).padStart(2, '0')}`,
-      organizer: i % 2 === 0 ? 'Pessoa 1' : 'Pessoa 2',
-      date: '',
-      location: '',
-      timeDeparture: '',
-      timeReturn: '',
-      spoiler: '',
-      status: 'planned',
-      memory: { photo: null, word: '', likedMost: '', momentToKeep: '', nextIdea: '' }
-    }));
-
-    function App() {
-      const [activeTab, setActiveTab] = useState('home');
-      
-      const [names, setNames] = useState(() => {
-        const saved = localStorage.getItem('guia_names');
-        return saved ? JSON.parse(saved) : { person1: 'Jully', person2: 'Pedro' };
-      });
-
-      const [userProfileName, setUserProfileName] = useState('Jully');
-
-      const [ratings, setRatings] = useState(() => {
-        const saved = localStorage.getItem('guia_ratings');
-        return saved ? JSON.parse(saved) : {};
-      });
-
-      const [quizAnswers, setQuizAnswers] = useState(() => {
-        const saved = localStorage.getItem('guia_quiz');
-        return saved ? JSON.parse(saved) : {};
-      });
-
-      const [meetings, setMeetings] = useState(() => {
-        const saved = localStorage.getItem('guia_meetings');
-        return saved ? JSON.parse(saved) : INITIAL_MEETINGS;
-      });
-      const [selectedMeetingNum, setSelectedMeetingNum] = useState(1);
-      const [openCategories, setOpenCategories] = useState({});
-
-      const [memorySubTab, setMemorySubTab] = useState('diario');
-
-      const [timeCapsule, setTimeCapsule] = useState(() => {
-        const saved = localStorage.getItem('guia_time_capsule');
-        return saved ? JSON.parse(saved) : {
-          openDate: 'Conclusão dos 12 Encontros',
-          dreamDestination: '',
-          bestExpectation: '',
-          secretMessage: '',
-          isSealed: false
-        };
-      });
-
-      const [rouletteWinner, setRouletteWinner] = useState(null);
-      const [isSpinning, setIsSpinning] = useState(false);
-      const [rotationDegree, setRotationDegree] = useState(0);
-
-      useEffect(() => {
-        localStorage.setItem('guia_names', JSON.stringify(names));
-      }, [names]);
-
-      useEffect(() => {
-        localStorage.setItem('guia_ratings', JSON.stringify(ratings));
-      }, [ratings]);
-
-      useEffect(() => {
-        localStorage.setItem('guia_quiz', JSON.stringify(quizAnswers));
-      }, [quizAnswers]);
-
-      useEffect(() => {
-        localStorage.setItem('guia_meetings', JSON.stringify(meetings));
-      }, [meetings]);
-
-      useEffect(() => {
-        localStorage.setItem('guia_time_capsule', JSON.stringify(timeCapsule));
-      }, [timeCapsule]);
-
-      const spinRoulette = () => {
-        if (isSpinning) return;
-        setIsSpinning(true);
-        setRouletteWinner(null);
-
-        const combinedString = (names.person1 + names.person2).toLowerCase();
-        let charCodeSum = 0;
-        for (let i = 0; i < combinedString.length; i++) {
-          charCodeSum += combinedString.charCodeAt(i);
-        }
+    <div class="max-w-5xl mx-auto p-4 md:p-6">
         
-        const winnerKey = charCodeSum % 2 === 0 ? 'person1' : 'person2';
-        const winnerName = names[winnerKey];
-
-        const extraSpins = 360 * 5; 
-        const targetAngle = winnerKey === 'person1' ? 0 : 180;
-        const currentMod = rotationDegree % 360;
-        const totalRotation = rotationDegree + extraSpins + (targetAngle - currentMod + 360) % 360;
-
-        setRotationDegree(totalRotation);
-
-        setTimeout(() => {
-          setRouletteWinner(winnerName);
-          setIsSpinning(false);
-        }, 3000);
-      };
-
-      const toggleCategory = (catId) => {
-        setOpenCategories(prev => ({ ...prev, [catId]: !prev[catId] }));
-      };
-
-      const handleRating = (itemKey, stars) => {
-        setRatings(prev => ({
-          ...prev,
-          [itemKey]: stars
-        }));
-      };
-
-      const handleQuizAnswer = (qId, val) => {
-        setQuizAnswers(prev => ({
-          ...prev,
-          [qId]: val
-        }));
-      };
-
-      const handleMeetingUpdate = (updatedMeeting) => {
-        setMeetings(prev => prev.map(m => m.number === updatedMeeting.number ? updatedMeeting : m));
-      };
-
-      const generatePDF = () => {
-        const element = document.getElementById('pdf-template');
-        const opt = {
-          margin:       [0.3, 0.3, 0.3, 0.3],
-          filename:     `Preferencias_Encontros_${userProfileName || 'MeuPerfil'}.pdf`,
-          image:        { type: 'jpeg', quality: 0.98 },
-          html2canvas:  { scale: 2, useCORS: true, logging: false },
-          jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
-        };
-        window.html2pdf().set(opt).from(element).save();
-      };
-
-      const generateQuizPDF = () => {
-        const element = document.getElementById('pdf-quiz-template');
-        const opt = {
-          margin:       [0.3, 0.3, 0.3, 0.3],
-          filename:     `Quiz_Afinidade_${userProfileName || 'MeuPerfil'}.pdf`,
-          image:        { type: 'jpeg', quality: 0.98 },
-          html2canvas:  { scale: 2, useCORS: true, logging: false },
-          jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
-        };
-        window.html2pdf().set(opt).from(element).save();
-      };
-
-      const completedCount = meetings.filter(m => m.status === 'completed').length;
-      const allMeetingsCompleted = completedCount === 12;
-
-      return (
-        <div className="max-w-4xl mx-auto px-4 py-6">
-          <header className="text-center my-8 border-b border-palette-border pb-8">
-            <span className="inline-block px-3 py-1 bg-palette-secondary text-palette-primary rounded-full text-xs font-semibold tracking-wider uppercase mb-3 border border-palette-border">
-              Colecionando Memórias
-            </span>
-            <h1 className="font-serif text-xl sm:text-2xl md:text-4xl text-palette-dark font-bold mb-3 whitespace-nowrap overflow-hidden text-ellipsis">
-              Aventura, Leveza e Companhia
-            </h1>
-
-            <div className="mt-6 max-w-xs mx-auto bg-palette-secondary p-3 rounded-2xl border border-palette-border">
-              <div className="flex justify-between text-xs font-semibold text-palette-dark mb-1">
-                <span>Jornada dos 12 Encontros</span>
-                <span>{completedCount} de 12 concluídos</span>
-              </div>
-              <div className="w-full bg-palette-border h-2.5 rounded-full overflow-hidden">
-                <div 
-                  className="bg-palette-primary h-full transition-all duration-500 rounded-full"
-                  style={{ width: `${(completedCount / 12) * 100}%` }}
-                ></div>
-              </div>
+        <!-- Cabeçalho -->
+        <header class="flex justify-between items-center mb-6 bg-slate-800/80 p-4 rounded-2xl border border-slate-700/50 backdrop-blur">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-emerald-500/20 text-emerald-400 rounded-xl flex items-center justify-center font-bold text-xl border border-emerald-500/30">
+                    💳
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg text-white leading-tight">FinControl <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/30">Pro</span></h1>
+                    <p class="text-xs text-slate-400">Método Fatura Fechada + Raio-X Leve</p>
+                </div>
             </div>
-          </header>
-
-          <nav className="flex justify-start md:justify-center gap-2 mb-8 overflow-x-auto pb-3 pt-1 px-1 scrollbar-thin">
-            {[
-              { id: 'home', label: 'Introdução' },
-              { id: 'form', label: 'Formulário' },
-              { id: 'quiz', label: 'Quiz de Afinidade' },
-              { id: 'meetings', label: '12 Encontros' },
-              { id: 'memories', label: 'Memórias' }
-            ].map(tab => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`px-4 py-2.5 rounded-xl font-medium text-sm transition-all whitespace-nowrap shrink-0 shadow-sm ${
-                  activeTab === tab.id
-                    ? 'bg-palette-primary text-white shadow-md'
-                    : 'bg-white text-palette-dark hover:bg-palette-secondary border border-palette-border'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </nav>
-
-          <main>
-            {activeTab === 'home' && (
-              <div className="bg-white p-6 md:p-8 rounded-3xl border border-palette-border shadow-sm space-y-6">
-                <div className="my-2 space-y-4">
-                  <div className="p-5 bg-palette-secondary/50 rounded-2xl border border-palette-border">
-                    <h3 className="font-semibold text-palette-primary text-lg mb-2">
-                      Organização das Experiências
-                    </h3>
-                    <p className="text-sm text-palette-dark/80 leading-relaxed">
-                      Ao longo dos 12 encontros, cada um fica responsável por organizar a experiência do mês, alternando. Quem organiza escolhe a atividade, arca com eventuais custos, pesquisa e cuida dos detalhes.
-                    </p>
-                  </div>
-
-                  <div className="p-5 bg-palette-secondary/50 rounded-2xl border border-palette-border">
-                    <p className="text-sm text-palette-dark/80 leading-relaxed font-medium">
-                      A vida pode ser leve e divertida. A ideia é sair um pouquinho da rotina, experimentar coisas novas, surpreender e explorar.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="bg-white p-5 rounded-3xl border border-palette-border shadow-sm grid md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-semibold text-palette-dark/70 mb-1">
-                      Editar Nome da Pessoa 1:
-                    </label>
-                    <input
-                      type="text"
-                      value={names.person1}
-                      onChange={e => setNames({ ...names, person1: e.target.value })}
-                      className="w-full p-3 bg-palette-secondary/40 border border-palette-border rounded-xl text-sm font-semibold text-palette-dark focus:outline-none focus:border-palette-primary"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-palette-dark/70 mb-1">
-                      Editar Nome da Pessoa 2:
-                    </label>
-                    <input
-                      type="text"
-                      value={names.person2}
-                      onChange={e => setNames({ ...names, person2: e.target.value })}
-                      className="w-full p-3 bg-palette-secondary/40 border border-palette-border rounded-xl text-sm font-semibold text-palette-dark focus:outline-none focus:border-palette-primary"
-                    />
-                  </div>
-                </div>
-
-                <div className="bg-gradient-to-r from-palette-secondary to-white p-6 rounded-3xl border-2 border-palette-border text-center space-y-4 shadow-sm">
-                  <span className="text-xs font-semibold text-palette-primary uppercase tracking-widest">
-                    Brincadeira da Sorte
-                  </span>
-                  <h3 className="font-serif font-bold text-xl md:text-2xl text-palette-dark">
-                    Quem começa a organizar o 1º encontro?
-                  </h3>
-                  
-                  <div className="flex flex-col items-center justify-center py-4">
-                    <div className="w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-b-[16px] border-b-palette-primary mb-[-6px] z-10"></div>
-                    
-                    <div 
-                      className="w-48 h-48 rounded-full border-4 border-palette-primary shadow-lg relative overflow-hidden flex items-center justify-center bg-white"
-                      style={{
-                        transform: `rotate(${rotationDegree}deg)`,
-                        transition: isSpinning ? 'transform 3s cubic-bezier(0.15, 0.85, 0.15, 1)' : 'none'
-                      }}
-                    >
-                      <div className="absolute top-0 left-0 w-full h-1/2 bg-[#F5EEF0] border-b border-palette-border flex items-center justify-center pt-2 px-2 text-center">
-                        <span className="font-serif font-bold text-palette-dark text-sm truncate">{names.person1}</span>
-                      </div>
-                      <div className="absolute bottom-0 left-0 w-full h-1/2 bg-[#D35400] flex items-center justify-center pb-2 px-2 text-center">
-                        <span className="font-serif font-bold text-white text-sm truncate">{names.person2}</span>
-                      </div>
-                      <div className="absolute w-6 h-6 bg-palette-dark rounded-full border-2 border-white shadow"></div>
-                    </div>
-                  </div>
-
-                  {rouletteWinner && !isSpinning && (
-                    <div className="p-3 bg-palette-primary text-white rounded-xl font-bold text-lg animate-bounce shadow-md inline-block px-6">
-                      {rouletteWinner} começa!
-                    </div>
-                  )}
-
-                  <div>
-                    <button
-                      onClick={spinRoulette}
-                      disabled={isSpinning}
-                      className="px-6 py-3 bg-palette-primary text-white font-medium rounded-xl hover:bg-palette-accent transition disabled:opacity-50 text-sm shadow-md"
-                    >
-                      {isSpinning ? 'A girar a roleta...' : 'Girar Roleta'}
-                    </button>
-                  </div>
-                </div>
-
-                <div className="bg-palette-secondary border border-palette-border p-6 rounded-2xl text-center">
-                  <h3 className="font-serif font-bold text-xl text-palette-dark mb-2">
-                    Prontos para começar?
-                  </h3>
-                  <p className="text-sm text-palette-dark/70 mb-4">
-                    Preencham o formulário, gerem o PDF e enviem um ao outro para descobrirem as coincidências!
-                  </p>
-                  <button
-                    onClick={() => setActiveTab('form')}
-                    className="px-6 py-3 bg-palette-primary text-white font-medium rounded-xl hover:bg-palette-accent transition"
-                  >
-                    Ir para o Formulário de Preferências →
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'form' && (
-              <div className="space-y-6">
-                <div className="bg-white p-6 rounded-3xl border border-palette-border shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
-                  <div>
-                    <h2 className="font-serif text-2xl font-bold text-palette-dark">
-                      Formulário de Preferências
-                    </h2>
-                    <p className="text-sm text-palette-dark/60">
-                      Preencha suas notas e gere o PDF no final para enviar ao seu par.
-                    </p>
-                  </div>
-
-                  <div className="w-full md:w-auto bg-palette-secondary p-3 rounded-2xl border border-palette-border flex items-center gap-2">
-                    <label className="text-xs font-bold text-palette-dark whitespace-nowrap">
-                      Meu Nome:
-                    </label>
-                    <input
-                      type="text"
-                      value={userProfileName}
-                      onChange={e => setUserProfileName(e.target.value)}
-                      placeholder="Digite seu nome"
-                      className="p-2 bg-white border border-palette-border rounded-xl text-xs font-bold text-palette-primary focus:outline-none w-full"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  {CATEGORIES.map(cat => {
-                    const isOpen = !!openCategories[cat.id];
-                    const ratedCount = cat.items.filter((_, idx) => {
-                      const itemKey = `${cat.id}_${idx}`;
-                      return (ratings[itemKey] || 0) > 0;
-                    }).length;
-
-                    return (
-                      <div key={cat.id} className="bg-white rounded-3xl border border-palette-border shadow-sm overflow-hidden transition-all">
-                        <button
-                          onClick={() => toggleCategory(cat.id)}
-                          className="w-full p-5 bg-palette-secondary/30 hover:bg-palette-secondary/60 flex items-center justify-between gap-3 text-left transition"
-                        >
-                          <h3 className="font-serif font-bold text-lg md:text-xl text-palette-primary flex-1 min-w-0">
-                            {cat.title}
-                          </h3>
-                          <div className="flex items-center gap-3 shrink-0">
-                            <span className="text-xs bg-palette-primary/10 text-palette-primary px-2.5 py-1 rounded-full font-semibold whitespace-nowrap">
-                              {ratedCount}/{cat.items.length} avaliados
-                            </span>
-                            <span className="text-palette-primary font-bold text-2xl w-6 text-center">
-                              {isOpen ? '−' : '+'}
-                            </span>
-                          </div>
-                        </button>
-
-                        {isOpen && (
-                          <div className="p-6 grid md:grid-cols-2 gap-4 border-t border-palette-border bg-white">
-                            {cat.items.map((item, idx) => {
-                              const itemKey = `${cat.id}_${idx}`;
-                              const currentStar = ratings[itemKey] || 0;
-
-                              return (
-                                <div key={idx} className="p-4 rounded-2xl border flex flex-col justify-between bg-palette-secondary/30 border-palette-border/60">
-                                  <span className="font-medium text-sm text-palette-dark mb-3">
-                                    {item}
-                                  </span>
-
-                                  <div className="flex items-center gap-1">
-                                    {[1, 2, 3, 4, 5].map(star => (
-                                      <button
-                                        key={star}
-                                        onClick={() => handleRating(itemKey, star)}
-                                        className={`text-2xl transition-transform hover:scale-125 ${
-                                          star <= currentStar ? 'text-amber-500' : 'text-gray-300'
-                                        }`}
-                                      >
-                                        ★
-                                      </button>
-                                    ))}
-                                    <span className="ml-2 text-xs text-palette-dark/50">
-                                      {currentStar > 0 ? `${currentStar}/5` : 'Não avaliado'}
-                                    </span>
-                                  </div>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-
-                <div className="bg-gradient-to-r from-palette-primary to-palette-accent p-6 rounded-3xl text-white flex flex-col md:flex-row items-center justify-between gap-4 shadow-md mt-8">
-                  <div>
-                    <h3 className="font-serif font-bold text-xl mb-1">
-                      Finalizou suas escolhas?
-                    </h3>
-                    <p className="text-xs opacity-90">
-                      Gere um PDF bonito com suas respostas e mande no WhatsApp para comparar com o seu amigo/a!
-                    </p>
-                  </div>
-                  <button
-                    onClick={generatePDF}
-                    className="px-6 py-3 bg-white text-palette-primary font-bold rounded-2xl hover:bg-palette-secondary transition text-sm shadow-md whitespace-nowrap"
-                  >
-                    Baixar Meu PDF Personalizado
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'quiz' && (
-              <div className="bg-white p-6 md:p-8 rounded-3xl border border-palette-border shadow-sm space-y-6">
-                <div className="flex flex-col md:flex-row justify-between items-center gap-4 border-b border-palette-border pb-6">
-                  <div>
-                    <span className="text-xs font-semibold text-palette-primary uppercase tracking-widest">
-                      Conexão e Intimidade
-                    </span>
-                    <h2 className="font-serif text-2xl md:text-3xl font-bold text-palette-dark">
-                      Quiz de Afinidade
-                    </h2>
-                    <p className="text-sm text-palette-dark/60 mt-1">
-                      Perguntas leves e especiais para se conhecerem ainda mais intimamente. Responda e gere um PDF para partilhar!
-                    </p>
-                  </div>
-
-                  <div className="w-full md:w-auto bg-palette-secondary p-3 rounded-2xl border border-palette-border flex items-center gap-2">
-                    <label className="text-xs font-bold text-palette-dark whitespace-nowrap">
-                      Meu Nome:
-                    </label>
-                    <input
-                      type="text"
-                      value={userProfileName}
-                      onChange={e => setUserProfileName(e.target.value)}
-                      placeholder="Digite seu nome"
-                      className="p-2 bg-white border border-palette-border rounded-xl text-xs font-bold text-palette-primary focus:outline-none w-full"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-6">
-                  {QUIZ_QUESTIONS.map((q, idx) => (
-                    <div key={q.id} className="p-5 bg-palette-secondary/30 border border-palette-border rounded-2xl space-y-3">
-                      <div className="flex items-start gap-3">
-                        <span className="flex items-center justify-center bg-palette-primary text-white rounded-full w-7 h-7 text-xs font-bold shrink-0">
-                          {idx + 1}
-                        </span>
-                        <h3 className="font-serif font-bold text-palette-dark text-base pt-0.5">
-                          {q.question}
-                        </h3>
-                      </div>
-                      <textarea
-                        rows="2"
-                        value={quizAnswers[q.id] || ''}
-                        onChange={e => handleQuizAnswer(q.id, e.target.value)}
-                        placeholder="Escreva sua resposta com carinho aqui..."
-                        className="w-full p-3 bg-white border border-palette-border rounded-xl text-sm focus:outline-none focus:border-palette-primary text-palette-dark"
-                      ></textarea>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="bg-gradient-to-r from-palette-primary to-palette-accent p-6 rounded-3xl text-white flex flex-col md:flex-row items-center justify-between gap-4 shadow-md mt-8">
-                  <div>
-                    <h3 className="font-serif font-bold text-xl mb-1">
-                      Terminou de responder o quiz?
-                    </h3>
-                    <p className="text-xs opacity-90">
-                      Gere o PDF das suas respostas para enviar ao seu par e conversarem sobre cada detalhe!
-                    </p>
-                  </div>
-                  <button
-                    onClick={generateQuizPDF}
-                    className="px-6 py-3 bg-white text-palette-primary font-bold rounded-2xl hover:bg-palette-secondary transition text-sm shadow-md whitespace-nowrap"
-                  >
-                    Baixar PDF do Quiz
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'meetings' && (
-              <div className="space-y-6">
-                <div className="bg-white p-6 rounded-3xl border border-palette-border shadow-sm">
-                  <h2 className="font-serif text-2xl font-bold text-palette-dark mb-2">
-                    Fichas dos 12 Encontros
-                  </h2>
-                  <p className="text-sm text-palette-dark/60 mb-6">
-                    Selecione o número do encontro para planejar os detalhes ou registrar como foi.
-                  </p>
-
-                  <div className="grid grid-cols-4 md:grid-cols-6 gap-3">
-                    {meetings.map(m => (
-                      <button
-                        key={m.number}
-                        onClick={() => setSelectedMeetingNum(m.number)}
-                        className={`p-3 rounded-2xl border font-serif text-center transition flex flex-col items-center justify-center ${
-                          selectedMeetingNum === m.number
-                            ? 'bg-palette-primary text-white border-palette-primary shadow-md scale-105'
-                            : m.status === 'completed'
-                            ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
-                            : 'bg-palette-secondary/40 text-palette-dark border border-palette-border hover:bg-palette-secondary'
-                        }`}
-                      >
-                        <span className="text-xs uppercase font-sans tracking-widest opacity-80">
-                          Nº
-                        </span>
-                        <span className="text-2xl font-bold">
-                          {String(m.number).padStart(2, '0')}
-                        </span>
-                        {m.status === 'completed' && (
-                          <span className="text-[10px] font-sans font-semibold bg-emerald-200 text-emerald-900 px-1.5 py-0.5 rounded mt-1">
-                            Feito
-                          </span>
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {(() => {
-                  const currentMeeting = meetings.find(m => m.number === selectedMeetingNum);
-                  if (!currentMeeting) return null;
-
-                  return (
-                    <div className="bg-white p-6 md:p-8 rounded-3xl border border-palette-border shadow-sm space-y-6">
-                      <div className="flex justify-between items-center pb-4 border-b border-palette-border">
-                        <div>
-                          <span className="text-xs font-semibold text-palette-primary uppercase tracking-widest">
-                            Ficha de Planejamento
-                          </span>
-                          <h3 className="font-serif text-3xl font-bold text-palette-dark">
-                            Encontro nº {String(currentMeeting.number).padStart(2, '0')}
-                          </h3>
-                        </div>
-
-                        <button
-                          onClick={() => handleMeetingUpdate({
-                            ...currentMeeting,
-                            status: currentMeeting.status === 'completed' ? 'planned' : 'completed'
-                          })}
-                          className={`px-4 py-2 rounded-xl text-xs font-bold transition ${
-                            currentMeeting.status === 'completed'
-                              ? 'bg-emerald-600 text-white'
-                              : 'bg-palette-secondary text-palette-dark border border-palette-border'
-                          }`}
-                        >
-                          {currentMeeting.status === 'completed' ? '✓ Concluído' : 'Marcar Feito'}
-                        </button>
-                      </div>
-
-                      <div className="grid md:grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-xs font-semibold text-palette-dark/70 mb-1">
-                            Nome da Experiência / Atividade
-                          </label>
-                          <input
-                            type="text"
-                            value={currentMeeting.title}
-                            onChange={e => handleMeetingUpdate({ ...currentMeeting, title: e.target.value })}
-                            placeholder="Ex: Tarde de Cerâmica & Café"
-                            className="w-full p-3 bg-palette-secondary/40 border border-palette-border rounded-xl text-sm focus:outline-none focus:border-palette-primary"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-xs font-semibold text-palette-dark/70 mb-1">
-                            Responsável pela Organização
-                          </label>
-                          <select
-                            value={currentMeeting.organizer}
-                            onChange={e => handleMeetingUpdate({ ...currentMeeting, organizer: e.target.value })}
-                            className="w-full p-3 bg-palette-secondary/40 border border-palette-border rounded-xl text-sm focus:outline-none focus:border-palette-primary"
-                          >
-                            <option value="Pessoa 1">{names.person1}</option>
-                            <option value="Pessoa 2">{names.person2}</option>
-                          </select>
-                        </div>
-
-                        <div>
-                          <label className="block text-xs font-semibold text-palette-dark/70 mb-1">
-                            Data Prevista
-                          </label>
-                          <input
-                            type="date"
-                            value={currentMeeting.date}
-                            onChange={e => handleMeetingUpdate({ ...currentMeeting, date: e.target.value })}
-                            className="w-full p-3 bg-palette-secondary/40 border border-palette-border rounded-xl text-sm focus:outline-none focus:border-palette-primary"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-xs font-semibold text-palette-dark/70 mb-1">
-                            Local e Endereço
-                          </label>
-                          <input
-                            type="text"
-                            value={currentMeeting.location}
-                            onChange={e => handleMeetingUpdate({ ...currentMeeting, location: e.target.value })}
-                            placeholder="Ex: Parque Central ou Ateliê X"
-                            className="w-full p-3 bg-palette-secondary/40 border border-palette-border rounded-xl text-sm focus:outline-none focus:border-palette-primary"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-xs font-semibold text-palette-dark/70 mb-1">
-                            Horário de Saída
-                          </label>
-                          <input
-                            type="time"
-                            value={currentMeeting.timeDeparture}
-                            onChange={e => handleMeetingUpdate({ ...currentMeeting, timeDeparture: e.target.value })}
-                            className="w-full p-3 bg-palette-secondary/40 border border-palette-border rounded-xl text-sm focus:outline-none focus:border-palette-primary"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-xs font-semibold text-palette-dark/70 mb-1">
-                            Retorno Previsto
-                          </label>
-                          <input
-                            type="time"
-                            value={currentMeeting.timeReturn}
-                            onChange={e => handleMeetingUpdate({ ...currentMeeting, timeReturn: e.target.value })}
-                            className="w-full p-3 bg-palette-secondary/40 border border-palette-border rounded-xl text-sm focus:outline-none focus:border-palette-primary"
-                          />
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="block text-xs font-semibold text-palette-dark/70 mb-1">
-                          Pista ou Spoiler do Encontro
-                        </label>
-                        <textarea
-                          rows="2"
-                          value={currentMeeting.spoiler}
-                          onChange={e => handleMeetingUpdate({ ...currentMeeting, spoiler: e.target.value })}
-                          placeholder="Ex: Traga roupas confortáveis..."
-                          className="w-full p-3 bg-palette-secondary/40 border border-palette-border rounded-xl text-sm focus:outline-none focus:border-palette-primary"
-                        ></textarea>
-                      </div>
-                    </div>
-                  );
-                })()}
-              </div>
-            )}
-
-            {activeTab === 'memories' && (
-              <div className="space-y-6">
-                <div className="flex bg-white p-2 rounded-2xl border border-palette-border shadow-sm justify-center gap-2">
-                  <button
-                    onClick={() => setMemorySubTab('diario')}
-                    className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition ${
-                      memorySubTab === 'diario'
-                        ? 'bg-palette-primary text-white shadow-sm'
-                        : 'text-palette-dark/70 hover:text-palette-dark bg-palette-secondary/40'
-                    }`}
-                  >
-                    Diário dos Encontros
-                  </button>
-                  <button
-                    onClick={() => setMemorySubTab('capsule')}
-                    className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition ${
-                      memorySubTab === 'capsule'
-                        ? 'bg-palette-primary text-white shadow-sm'
-                        : 'text-palette-dark/70 hover:text-palette-dark bg-palette-secondary/40'
-                    }`}
-                  >
-                    Cápsula do Tempo
-                  </button>
-                </div>
-
-                {memorySubTab === 'diario' && (
-                  <div className="space-y-6">
-                    <div className="bg-white p-6 rounded-3xl border border-palette-border shadow-sm">
-                      <h2 className="font-serif text-2xl font-bold text-palette-dark mb-2">
-                        Registro das Memórias
-                      </h2>
-                      <p className="text-sm text-palette-dark/60 mb-6">
-                        Guarde fotos, recordações e palavras especiais vividas em cada encontro.
-                      </p>
-
-                      <div className="flex gap-2 overflow-x-auto pb-2">
-                        {meetings.map(m => (
-                          <button
-                            key={m.number}
-                            onClick={() => setSelectedMeetingNum(m.number)}
-                            className={`px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition ${
-                              selectedMeetingNum === m.number
-                                ? 'bg-palette-primary text-white'
-                                : 'bg-palette-secondary/40 text-palette-dark border border-palette-border hover:bg-palette-secondary'
-                            }`}
-                          >
-                            Encontro {String(m.number).padStart(2, '0')}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    {(() => {
-                      const currentMeeting = meetings.find(m => m.number === selectedMeetingNum);
-                      if (!currentMeeting) return null;
-
-                      const memory = currentMeeting.memory || {};
-
-                      const updateMemory = (field, val) => {
-                        handleMeetingUpdate({
-                          ...currentMeeting,
-                          memory: { ...memory, [field]: val }
-                        });
-                      };
-
-                      const handlePhotoUpload = (e) => {
-                        const file = e.target.files[0];
-                        if (file) {
-                          const reader = new FileReader();
-                          reader.onloadend = () => {
-                            updateMemory('photo', reader.result);
-                          };
-                          reader.readAsDataURL(file);
-                        }
-                      };
-
-                      return (
-                        <div className="bg-white p-6 md:p-8 rounded-3xl border border-palette-border shadow-sm space-y-6">
-                          <div className="border-b border-palette-border pb-4">
-                            <span className="text-xs font-semibold text-palette-primary uppercase tracking-widest">
-                              Diário do Encontro
-                            </span>
-                            <h3 className="font-serif text-3xl font-bold text-palette-dark">
-                              {currentMeeting.title || `Encontro ${currentMeeting.number}`}
-                            </h3>
-                          </div>
-
-                          <div className="grid md:grid-cols-2 gap-6">
-                            <div className="flex flex-col items-center">
-                              <div className="w-full bg-palette-secondary/40 p-4 rounded-2xl border border-palette-border shadow-inner text-center">
-                                {memory.photo ? (
-                                  <div className="relative group">
-                                    <img
-                                      src={memory.photo}
-                                      alt="Recordação"
-                                      className="w-full h-64 object-cover rounded-xl shadow-md mb-3"
-                                    />
-                                    <button
-                                      onClick={() => updateMemory('photo', null)}
-                                      className="absolute top-2 right-2 bg-red-600 text-white p-1.5 rounded-full text-xs opacity-80 hover:opacity-100"
-                                    >
-                                      ✕ Remover
-                                    </button>
-                                  </div>
-                                ) : (
-                                  <div className="h-64 border-2 border-dashed border-palette-border rounded-xl flex flex-col items-center justify-center p-6 text-palette-dark/40">
-                                    <span className="text-4xl mb-2">📷</span>
-                                    <p className="text-xs mb-4">Adicione uma foto, ingresso ou recordação</p>
-                                    <label className="cursor-pointer px-4 py-2 bg-palette-primary text-white rounded-xl text-xs font-semibold hover:bg-palette-accent transition">
-                                      Carregar Foto
-                                      <input type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
-                                    </label>
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-
-                            <div className="space-y-4">
-                              <div>
-                                <label className="block text-xs font-semibold text-palette-dark/70 mb-1">
-                                  Uma palavra para definir esse encontro:
-                                </label>
-                                <input
-                                  type="text"
-                                  value={memory.word || ''}
-                                  onChange={e => updateMemory('word', e.target.value)}
-                                  placeholder="Ex: Mágico, Inesquecível..."
-                                  className="w-full p-3 bg-palette-secondary/40 border border-palette-border rounded-xl text-sm focus:outline-none focus:border-palette-primary font-serif font-bold text-palette-primary"
-                                />
-                              </div>
-
-                              <div>
-                                <label className="block text-xs font-semibold text-palette-dark/70 mb-1">
-                                  O que mais gostei ou me surpreendeu:
-                                </label>
-                                <textarea
-                                  rows="2"
-                                  value={memory.likedMost || ''}
-                                  onChange={e => updateMemory('likedMost', e.target.value)}
-                                  className="w-full p-3 bg-palette-secondary/40 border border-palette-border rounded-xl text-sm focus:outline-none focus:border-palette-primary"
-                                ></textarea>
-                              </div>
-
-                              <div>
-                                <label className="block text-xs font-semibold text-palette-dark/70 mb-1">
-                                  Um momento que quero guardar na memória:
-                                </label>
-                                <textarea
-                                  rows="2"
-                                  value={memory.momentToKeep || ''}
-                                  onChange={e => updateMemory('momentToKeep', e.target.value)}
-                                  className="w-full p-3 bg-palette-secondary/40 border border-palette-border rounded-xl text-sm focus:outline-none focus:border-palette-primary"
-                                ></textarea>
-                              </div>
-
-                              <div>
-                                <label className="block text-xs font-semibold text-palette-dark/70 mb-1">
-                                  Uma ideia para o próximo encontro:
-                                </label>
-                                <input
-                                  type="text"
-                                  value={memory.nextIdea || ''}
-                                  onChange={e => updateMemory('nextIdea', e.target.value)}
-                                  className="w-full p-3 bg-palette-secondary/40 border border-palette-border rounded-xl text-sm focus:outline-none focus:border-palette-primary"
-                                />
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })()}
-                  </div>
-                )}
-
-                {memorySubTab === 'capsule' && (
-                  <div className="bg-white p-6 md:p-8 rounded-3xl border border-palette-border shadow-sm space-y-6">
-                    <div className="border-b border-palette-border pb-4">
-                      <span className="text-xs font-semibold text-palette-primary uppercase tracking-widest">
-                        Nossa História
-                      </span>
-                      <h2 className="font-serif text-3xl font-bold text-palette-dark">
-                        Cápsula do Tempo para o Futuro
-                      </h2>
-                      <p className="text-sm text-palette-dark/60 mt-1">
-                        Escrevam seus desejos e sonhos agora. A cápsula ficará trancada até que todos os 12 encontros sejam concluídos!
-                      </p>
-                    </div>
-
-                    <div className="space-y-4">
-                      <div>
-                        <div className="flex justify-between items-center mb-1">
-                          <label className="block text-xs font-semibold text-palette-dark/70">
-                            Data ou Condição de Abertura:
-                          </label>
-                          <button
-                            onClick={() => setTimeCapsule({ ...timeCapsule, openDate: 'Conclusão dos 12 Encontros' })}
-                            className="text-xs text-palette-primary font-bold hover:underline"
-                          >
-                            Definir para Concluir os 12 Encontros
-                          </button>
-                        </div>
-                        <input
-                          type="text"
-                          disabled={timeCapsule.isSealed}
-                          value={timeCapsule.openDate}
-                          onChange={e => setTimeCapsule({ ...timeCapsule, openDate: e.target.value })}
-                          placeholder="Ex: Conclusão dos 12 Encontros ou 31/12/2026"
-                          className="w-full p-3 bg-palette-secondary/40 border border-palette-border rounded-xl text-sm focus:outline-none focus:border-palette-primary disabled:opacity-60 font-semibold text-palette-primary"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-xs font-semibold text-palette-dark/70 mb-1">
-                          Qual o destino dos sonhos que queremos realizar juntos?
-                        </label>
-                        <textarea
-                          rows="2"
-                          disabled={timeCapsule.isSealed}
-                          value={timeCapsule.dreamDestination}
-                          onChange={e => setTimeCapsule({ ...timeCapsule, dreamDestination: e.target.value })}
-                          placeholder="Ex: Viajar para a serra ou conhecer a praia X..."
-                          className="w-full p-3 bg-palette-secondary/40 border border-palette-border rounded-xl text-sm focus:outline-none focus:border-palette-primary disabled:opacity-60"
-                        ></textarea>
-                      </div>
-
-                      <div>
-                        <label className="block text-xs font-semibold text-palette-dark/70 mb-1">
-                          Nossa maior expectativa para estes 12 encontros:
-                        </label>
-                        <textarea
-                          rows="2"
-                          disabled={timeCapsule.isSealed}
-                          value={timeCapsule.bestExpectation}
-                          onChange={e => setTimeCapsule({ ...timeCapsule, bestExpectation: e.target.value })}
-                          placeholder="Ex: Criar o hábito de sair mais da rotina..."
-                          className="w-full p-3 bg-palette-secondary/40 border border-palette-border rounded-xl text-sm focus:outline-none focus:border-palette-primary disabled:opacity-60"
-                        ></textarea>
-                      </div>
-
-                      <div>
-                        <label className="block text-xs font-semibold text-palette-dark/70 mb-1">
-                          Uma mensagem secreta / promessa para o futuro:
-                        </label>
-                        <textarea
-                          rows="2"
-                          disabled={timeCapsule.isSealed}
-                          value={timeCapsule.secretMessage}
-                          onChange={e => setTimeCapsule({ ...timeCapsule, secretMessage: e.target.value })}
-                          placeholder="Ex: Espero que estejamos tão unidos quanto agora..."
-                          className="w-full p-3 bg-palette-secondary/40 border border-palette-border rounded-xl text-sm focus:outline-none focus:border-palette-primary disabled:opacity-60"
-                        ></textarea>
-                      </div>
-
-                      <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-4 bg-palette-secondary/30 p-5 rounded-2xl border border-palette-border">
-                        <div>
-                          <p className="font-bold text-palette-dark text-sm">
-                            Progresso: {completedCount} de 12 encontros concluídos
-                          </p>
-                          <p className="text-xs text-palette-dark/60">
-                            {allMeetingsCompleted ? 'Parabéns! Todos os 12 encontros concluídos. A cápsula pode ser aberta!' : 'A cápsula permanecerá selada até concluírem os 12 encontros.'}
-                          </p>
-                        </div>
-                        <button
-                          onClick={() => setTimeCapsule({ ...timeCapsule, isSealed: !timeCapsule.isSealed })}
-                          className={`px-6 py-3 rounded-xl font-bold text-sm transition shadow-md ${
-                            timeCapsule.isSealed
-                              ? 'bg-amber-600 text-white hover:bg-amber-700'
-                              : 'bg-palette-primary text-white hover:bg-palette-accent'
-                          }`}
-                        >
-                          {timeCapsule.isSealed ? '🔓 Desbloquear Cápsula' : '🔒 Selar Cápsula'}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-          </main>
-
-          {/* TEMPLATE OCULTO DO PDF DO FORMULÁRIO (COMPACTO E AJUSTADO PARA 2 PÁGINAS SEM CORTES) */}
-          <div style={{ position: 'absolute', left: '-9999px', top: 0, width: '680px' }}>
-            <div id="pdf-template" style={{ padding: '15px', background: '#FFFFFF', color: '#4A235A', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
-              <div style={{ textAlign: 'center', borderBottom: '2px solid #D35400', paddingBottom: '10px', marginBottom: '12px' }}>
-                <span style={{ fontSize: '9px', color: '#D35400', textTransform: 'uppercase', fontWeight: 'bold' }}>
-                  Guia de Experiências & Encontros
-                </span>
-                <h1 style={{ fontFamily: 'Playfair Display, serif', color: '#4A235A', fontSize: '20px', margin: '3px 0' }}>
-                  Aventura, Leveza e Companhia
-                </h1>
-                <p style={{ fontSize: '12px', color: '#D35400', fontWeight: 'bold', margin: 0 }}>
-                  Perfil de Preferências: {userProfileName || 'Anônimo'}
-                </p>
-              </div>
-
-              {CATEGORIES.map(cat => (
-                <div key={cat.id} style={{ marginBottom: '10px', pageBreakInside: 'avoid', breakInside: 'avoid' }}>
-                  <h3 style={{ fontSize: '11px', color: '#D35400', borderBottom: '1px solid #EADCD7', paddingBottom: '2px', margin: '4px 0 4px 0', fontWeight: 'bold' }}>
-                    {cat.title}
-                  </h3>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '5px' }}>
-                    {cat.items.map((item, idx) => {
-                      const key = `${cat.id}_${idx}`;
-                      const score = ratings[key] || 0;
-                      return (
-                        <div key={idx} style={{ padding: '3px 6px', backgroundColor: '#FAF6F0', borderRadius: '5px', border: '1px solid #EADCD7', fontSize: '9.5px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <span style={{ paddingRight: '4px' }}>{item}</span>
-                          <strong style={{ color: score >= 4 ? '#D35400' : '#4A235A', whiteSpace: 'nowrap' }}>
-                            {score > 0 ? `${score} ★` : '-'}
-                          </strong>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              ))}
+            <div class="flex items-center gap-2">
+                <input type="month" id="seletorMes" class="bg-slate-900 border border-slate-700 text-xs text-slate-200 px-3 py-2 rounded-xl focus:outline-none focus:border-emerald-500" value="2026-10" onchange="renderizarTela()">
             </div>
-          </div>
+        </header>
 
-          {/* TEMPLATE OCULTO DO PDF DO QUIZ */}
-          <div style={{ position: 'absolute', left: '-9999px', top: 0, width: '680px' }}>
-            <div id="pdf-quiz-template" style={{ padding: '15px', background: '#FFFFFF', color: '#4A235A', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
-              <div style={{ textAlign: 'center', borderBottom: '2px solid #D35400', paddingBottom: '10px', marginBottom: '12px' }}>
-                <span style={{ fontSize: '9px', color: '#D35400', textTransform: 'uppercase', fontWeight: 'bold' }}>
-                  Quiz de Afinidade & Conexão
-                </span>
-                <h1 style={{ fontFamily: 'Playfair Display, serif', color: '#4A235A', fontSize: '20px', margin: '3px 0' }}>
-                  Aventura, Leveza e Companhia
-                </h1>
-                <p style={{ fontSize: '12px', color: '#D35400', fontWeight: 'bold', margin: 0 }}>
-                  Respostas de: {userProfileName || 'Anônimo'}
-                </p>
-              </div>
-
-              {QUIZ_QUESTIONS.map((q, idx) => (
-                <div key={q.id} style={{ marginBottom: '10px', padding: '8px', backgroundColor: '#FAF6F0', borderRadius: '6px', border: '1px solid #EADCD7', pageBreakInside: 'avoid', breakInside: 'avoid' }}>
-                  <p style={{ fontSize: '10.5px', fontWeight: 'bold', color: '#4A235A', marginBottom: '3px' }}>
-                    {idx + 1}. {q.question}
-                  </p>
-                  <p style={{ fontSize: '10.5px', color: '#D35400', fontStyle: 'italic', margin: 0 }}>
-                    {quizAnswers[q.id] ? `"${quizAnswers[q.id]}"` : '(Não respondido)'}
-                  </p>
-                </div>
-              ))}
+        <!-- Botão de Colar Texto -->
+        <div class="bg-slate-800/60 p-4 rounded-2xl border border-slate-700/40 mb-6 space-y-3">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">⚡ Lançar Fatura:</h3>
+            <div>
+                <button onclick="abrirModalTexto()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-semibold p-3 rounded-xl transition text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/10">
+                    📋 Colar Texto da Fatura
+                </button>
             </div>
-          </div>
-
         </div>
-      );
-    }
 
-    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
-  </script>
+        <!-- Resumo de Caixa (Aba 1) -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
+            <div class="bg-slate-800/60 p-4 rounded-2xl border border-slate-700/40">
+                <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Total Entradas</span>
+                <h2 id="totalEntradas" class="text-xl font-bold text-emerald-400 mt-1">R$ 0,00</h2>
+            </div>
+            <div class="bg-slate-800/60 p-4 rounded-2xl border border-slate-700/40">
+                <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Total Saídas (Fatura Fechada)</span>
+                <h2 id="totalSaidas" class="text-xl font-bold text-rose-400 mt-1">R$ 0,00</h2>
+            </div>
+            <div class="bg-slate-800/60 p-4 rounded-2xl border border-slate-700/40">
+                <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Saldo Líquido</span>
+                <h2 id="saldoLiquido" class="text-xl font-bold text-blue-400 mt-1">R$ 0,00</h2>
+            </div>
+        </div>
+
+        <!-- Tabela do Raio-X (Aba 2) -->
+        <div class="bg-slate-800/60 rounded-2xl border border-slate-700/40 overflow-hidden backdrop-blur">
+            <div class="p-4 border-b border-slate-700/40 flex justify-between items-center">
+                <div>
+                    <h3 class="font-bold text-sm text-slate-200">Raio-X de Compras e Parcelas Ativas</h3>
+                    <p class="text-[11px] text-slate-400">Somente compras reais (descartes institucionais automáticos).</p>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse text-xs">
+                    <thead>
+                        <tr class="bg-slate-900/50 text-slate-400 text-[10px] uppercase tracking-wider border-b border-slate-700/40">
+                            <th class="p-3">Descrição da Compra</th>
+                            <th class="p-3">Categoria</th>
+                            <th class="p-3 text-center">Parcela Atual</th>
+                            <th class="p-3 text-right">Valor Parcela</th>
+                            <th class="p-3 text-left min-w-[150px]">Nota / Observação</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelaRaioX" class="divide-y divide-slate-700/30">
+                        <tr>
+                            <td colspan="5" class="p-6 text-center text-slate-500">Nenhuma fatura importada. Use o botão acima para colar os dados.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Modal Colar Texto -->
+    <div id="modalTexto" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
+        <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700 max-w-lg w-full space-y-4">
+            <h3 class="font-bold text-sm text-white">Copie e cole o texto da fatura abaixo:</h3>
+            <textarea id="textoFatura" rows="10" class="w-full bg-slate-900 border border-slate-700 text-xs text-slate-200 p-3 rounded-xl focus:outline-none focus:border-emerald-500" placeholder="Selecione tudo no PDF do seu celular, copie e cole aqui..."></textarea>
+            <div class="flex justify-end gap-2">
+                <button onclick="fecharModalTexto()" class="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-xl text-xs">Cancelar</button>
+                <button onclick="processarTextoBruto()" class="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs">Processar Fatura</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let db = JSON.parse(localStorage.getItem('fincontrol_db_v7')) || {};
+
+        const termosIgnorar = [
+            'total da fatura', 'limite de compras', 'limite de saque', 'recomendado pagamento',
+            'pagamento minimo', 'pagamento maximo', 'rotativo', 'saque parcelado', 'proximas faturas',
+            'compras parceladas', 'parcelamento fatura', 'encargos', 'protecao financeira',
+            'anuidade', 'saldo anterior', 'pagamentos/creditos', 'subtotal', 'total para',
+            'pagto. por deb', 'creditos/pagamentos', 'compras/debitos', 'cet do', 'taxa ao',
+            'valor total financiado', 'total a financiar', 'valor do iof', 'valor total a pagar',
+            'pagamento de contas', 'saque a vista', 'crediario', 'com juros', 'ultrapassem o limite',
+            'será devolvida em fatura', 'de acordo com a legislação', 'caso o pagamento realizado',
+            '1ª ela de', '1a ela de', '(=)total', '(-) creditos', '(+)compras', 'total para gilberto'
+        ];
+
+        const categoriasDisponiveis = [
+            "Pessoal",
+            "Mercado",
+            "Combustível",
+            "Saúde",
+            "Manutenção Casa",
+            "Manutenção carro",
+            "Estudo",
+            "Locomoção",
+            "Lazer",
+            "Presentes"
+        ];
+
+        function normalizarTexto(txt) {
+            return txt.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+        }
+
+        function abrirModalTexto() {
+            document.getElementById('modalTexto').classList.remove('hidden');
+        }
+
+        function fecharModalTexto() {
+            document.getElementById('modalTexto').classList.add('hidden');
+        }
+
+        function processarTextoBruto() {
+            const texto = document.getElementById('textoFatura').value;
+            if (!texto) return;
+            let linhas = texto.split('\n');
+            extrairDadosFatura(linhas);
+            fecharModalTexto();
+        }
+
+        function extrairDadosFatura(linhas) {
+            let mesChave = document.getElementById('seletorMes').value;
+            let compras = [];
+            let valorFaturaFechada = 0;
+
+            linhas.forEach(linha => {
+                let linhaNorm = normalizarTexto(linha);
+
+                if (linhaNorm.includes("total da fatura") || linhaNorm.includes("(=)total") || linhaNorm.includes("total em real")) {
+                    let matchTotal = linha.match(/R?\$?\s*(\d{1,3}(?:\.\d{3})*,\d{2})/);
+                    if (matchTotal) {
+                        let valTot = parseFloat(matchTotal[1].replace(/\./g, '').replace(',', '.'));
+                        if (valTot > valorFaturaFechada) valorFaturaFechada = valTot;
+                    }
+                }
+
+                if (termosIgnorar.some(termo => linhaNorm.includes(termo)) || linha.includes('%')) {
+                    return;
+                }
+
+                let matchValor = linha.match(/R?\$?\s*(\d{1,3}(?:\.\d{3})*,\d{2})/);
+                if (!matchValor) return;
+
+                let valor = parseFloat(matchValor[1].replace(/\./g, '').replace(',', '.'));
+                if (isNaN(valor) || valor <= 0) return;
+
+                let parcela = "À vista";
+                let regexParcela = /(\d{1,2})\/(\d{1,2})/g;
+                let matches = [...linha.matchAll(regexParcela)];
+
+                matches.forEach(m => {
+                    let numAtual = parseInt(m[1], 10);
+                    let numTotal = parseInt(m[2], 10);
+
+                    if (numAtual <= numTotal && numTotal > 1 && numTotal <= 48 && numTotal !== 26) {
+                        parcela = `${String(numAtual).padStart(2, '0')}/${String(numTotal).padStart(2, '0')}`;
+                    }
+                });
+
+                let nome = linha
+                    .replace(/R?\$?\s*\d{1,3}(?:\.\d{3})*,\d{2}/g, '')
+                    .replace(/\d{1,2}\/\d{1,2}/g, '')
+                    .replace(/PARC/gi, '')
+                    .replace(/^\d+\s+/, '')
+                    .replace(/[\.\*\%]/g, ' ')
+                    .replace(/SERÁ DEVOLVIDA EM FATURA.*/gi, '')
+                    .trim();
+
+                if (nome.length < 3 || nome === "/2026" || nome === "2026") return;
+
+                let categoria = "Pessoal";
+                let nLower = nome.toLowerCase();
+
+                if (nLower.includes("posto") || nLower.includes("combustivel") || nLower.includes("auto posto") || nLower.includes("gas 1")) {
+                    categoria = "Combustível";
+                } else if (nLower.includes("mercado") || nLower.includes("jacomar") || nLower.includes("bonato") || nLower.includes("sacolao") || nLower.includes("condor") || nLower.includes("panif") || nLower.includes("fuchs")) {
+                    categoria = "Mercado";
+                } else if (nLower.includes("farmacia") || nLower.includes("droga") || nLower.includes("saude") || nLower.includes("medprev") || nLower.includes("panvel") || nLower.includes("niss")) {
+                    categoria = "Saúde";
+                } else if (nLower.includes("materiais") || nLower.includes("toka") || nLower.includes("madeira") || nLower.includes("casa china") || nLower.includes("reforma")) {
+                    categoria = "Manutenção Casa";
+                } else if (nLower.includes("uber") || nLower.includes("99app") || nLower.includes("taxi") || nLower.includes("99 pop")) {
+                    categoria = "Locomoção";
+                } else if (nLower.includes("oficina") || nLower.includes("autopecas") || nLower.includes("pneu") || nLower.includes("mecanica")) {
+                    categoria = "Manutenção carro";
+                } else if (nLower.includes("livro") || nLower.includes("curso") || nLower.includes("escola") || nLower.includes("faculdade")) {
+                    categoria = "Estudo";
+                } else if (nLower.includes("netflix") || nLower.includes("spotify") || nLower.includes("cinema") || nLower.includes("ingressos")) {
+                    categoria = "Lazer";
+                }
+
+                compras.push({
+                    descricao: nome.toUpperCase(),
+                    categoria: categoria,
+                    parcela: parcela,
+                    valor: valor,
+                    nota: ""
+                });
+            });
+
+            if (valorFaturaFechada === 0) {
+                valorFaturaFechada = compras.reduce((acc, c) => acc + c.valor, 0);
+            }
+
+            db[mesChave] = {
+                faturaFechada: valorFaturaFechada,
+                compras: compras
+            };
+
+            localStorage.setItem('fincontrol_db_v7', JSON.stringify(db));
+            renderizarTela();
+        }
+
+        function alterarCategoria(index, novaCategoria) {
+            let mesChave = document.getElementById('seletorMes').value;
+            if (db[mesChave] && db[mesChave].compras[index]) {
+                db[mesChave].compras[index].categoria = novaCategoria;
+                localStorage.setItem('fincontrol_db_v7', JSON.stringify(db));
+            }
+        }
+
+        function alterarNota(index, novaNota) {
+            let mesChave = document.getElementById('seletorMes').value;
+            if (db[mesChave] && db[mesChave].compras[index]) {
+                db[mesChave].compras[index].nota = novaNota;
+                localStorage.setItem('fincontrol_db_v7', JSON.stringify(db));
+            }
+        }
+
+        function renderizarTela() {
+            let mesChave = document.getElementById('seletorMes').value;
+            let dadosMes = db[mesChave] || { faturaFechada: 0, compras: [] };
+
+            document.getElementById('totalSaidas').innerText = `R$ ${dadosMes.faturaFechada.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            document.getElementById('saldoLiquido').innerText = `R$ ${(-dadosMes.faturaFechada).toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+
+            let tbody = document.getElementById('tabelaRaioX');
+            tbody.innerHTML = '';
+
+            if (dadosMes.compras.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-500">Nenhuma fatura importada. Use o botão acima para colar os dados.</td></tr>`;
+                return;
+            }
+
+            dadosMes.compras.forEach((item, index) => {
+                let tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-700/20 transition";
+                
+                let badgeParcela = item.parcela !== "À vista" 
+                    ? `<span class="bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded-md font-semibold text-[10px]">${item.parcela}</span>`
+                    : `<span class="bg-slate-700/40 text-slate-400 px-2 py-0.5 rounded-md text-[10px]">${item.parcela}</span>`;
+
+                let optionsCategoria = categoriasDisponiveis.map(cat => 
+                    `<option value="${cat}" ${cat === item.categoria ? 'selected' : ''}>${cat}</option>`
+                ).join('');
+
+                tr.innerHTML = `
+                    <td class="p-3 font-medium text-slate-200">${item.descricao}</td>
+                    <td class="p-3">
+                        <select onchange="alterarCategoria(${index}, this.value)" class="bg-slate-900 border border-slate-700/80 text-slate-300 px-2 py-1 rounded-md text-[11px] focus:outline-none focus:border-emerald-500">
+                            ${optionsCategoria}
+                        </select>
+                    </td>
+                    <td class="p-3 text-center">${badgeParcela}</td>
+                    <td class="p-3 text-right font-semibold text-slate-200">R$ ${item.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                    <td class="p-3">
+                        <input type="text" value="${item.nota || ''}" placeholder="Adicionar nota..." onchange="alterarNota(${index}, this.value)" class="w-full bg-slate-900/60 border border-slate-700/50 text-slate-300 text-[11px] px-2 py-1 rounded-md focus:outline-none focus:border-emerald-500 placeholder:text-slate-600" />
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        renderizarTela();
+    </script>
 </body>
 </html>
