@@ -3,81 +3,159 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FinControl Pro - Fatura Fechada & Raio-X</title>
+    <title>FinControl Pro - Extensão & Projeção Contínua</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background-color: #0f172a; color: #f8fafc; }
+        body { background-color: #0b0f19; color: #f8fafc; }
+        input[type="month"]::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+            cursor: pointer;
+        }
     </style>
 </head>
-<body class="font-sans antialiased min-h-screen pb-12">
+<body class="font-sans antialiased min-h-screen pb-12 selection:bg-emerald-500 selection:text-slate-950">
 
-    <div class="max-w-5xl mx-auto p-4 md:p-6">
+    <div class="max-w-5xl mx-auto p-4 md:p-6 space-y-6">
         
-        <!-- Cabeçalho -->
-        <header class="flex justify-between items-center mb-6 bg-slate-800/80 p-4 rounded-2xl border border-slate-700/50 backdrop-blur">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-emerald-500/20 text-emerald-400 rounded-xl flex items-center justify-center font-bold text-xl border border-emerald-500/30">
+        <!-- Cabeçalho Moderno & Fluído -->
+        <header class="bg-gradient-to-br from-slate-900/90 to-slate-800/80 p-5 rounded-3xl border border-slate-700/60 shadow-xl shadow-black/40 backdrop-blur-xl flex flex-col md:flex-row justify-between items-center gap-4">
+            
+            <div class="flex items-center gap-3.5 w-full md:w-auto">
+                <div class="w-12 h-12 bg-gradient-to-tr from-emerald-500/30 to-emerald-400/10 text-emerald-400 rounded-2xl flex items-center justify-center text-2xl border border-emerald-500/30 shadow-inner">
                     💳
                 </div>
                 <div>
-                    <h1 class="font-bold text-lg text-white leading-tight">FinControl <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/30">Pro</span></h1>
-                    <p class="text-xs text-slate-400">Método Fatura Fechada + Raio-X Leve</p>
+                    <div class="flex items-center gap-2">
+                        <h1 class="font-black text-xl text-white tracking-tight">FinControl</h1>
+                        <span class="text-[10px] uppercase font-extrabold bg-emerald-500 text-slate-950 px-2 py-0.5 rounded-full shadow-sm shadow-emerald-500/50">Pro</span>
+                    </div>
+                    <p class="text-xs text-slate-400 font-medium">Projeção Contínua & Memória de Categorias</p>
                 </div>
             </div>
-            <div class="flex items-center gap-2">
-                <input type="month" id="seletorMes" class="bg-slate-900 border border-slate-700 text-xs text-slate-200 px-3 py-2 rounded-xl focus:outline-none focus:border-emerald-500" value="2026-10" onchange="renderizarTela()">
+            
+            <div class="flex items-center gap-2.5 w-full md:w-auto justify-end overflow-x-auto pb-1 md:pb-0">
+                <div class="relative bg-slate-950/80 border border-slate-700/80 rounded-2xl px-3 py-2 flex items-center gap-2 shadow-inner">
+                    <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">📅 Mês:</span>
+                    <input type="month" id="seletorMes" class="bg-transparent text-xs font-bold text-emerald-400 focus:outline-none cursor-pointer" value="2026-10" onchange="renderizarTela()">
+                </div>
+                
+                <button onclick="exportarDados()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700/80 px-3.5 py-2.5 rounded-2xl text-xs font-semibold transition flex items-center gap-1.5 shadow-md active:scale-95" title="Salvar Backup">
+                    💾 <span class="hidden sm:inline">Backup</span>
+                </button>
+
+                <button onclick="document.getElementById('fileBackupInput').click()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700/80 px-3.5 py-2.5 rounded-2xl text-xs font-semibold transition flex items-center gap-1.5 shadow-md active:scale-95" title="Carregar Backup">
+                    📂 <span class="hidden sm:inline">Restaurar</span>
+                </button>
+                <input type="file" id="fileBackupInput" accept="*" class="hidden" onchange="importarDados(event)">
             </div>
         </header>
 
-        <!-- Botão de Colar Texto -->
-        <div class="bg-slate-800/60 p-4 rounded-2xl border border-slate-700/40 mb-6 space-y-3">
-            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">⚡ Lançar Fatura:</h3>
+        <!-- Resumo de Caixa -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3.5">
+            <div class="bg-slate-900/60 p-4 rounded-3xl border border-slate-800 shadow-lg backdrop-blur flex flex-col justify-between">
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Entradas</span>
+                <h2 id="totalEntradas" class="text-2xl font-black text-emerald-400 mt-2">R$ 0,00</h2>
+            </div>
+            <div class="bg-slate-900/60 p-4 rounded-3xl border border-slate-800 shadow-lg backdrop-blur flex flex-col justify-between">
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">(-) Fixos & Assinaturas</span>
+                <h2 id="totalFixosEmprestimos" class="text-2xl font-black text-amber-400 mt-2">R$ 0,00</h2>
+            </div>
+            <div class="bg-slate-900/60 p-4 rounded-3xl border border-slate-800 shadow-lg backdrop-blur flex flex-col justify-between">
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">(-) Cartão (Fatura/Parcelas)</span>
+                <h2 id="totalFaturaCartao" class="text-2xl font-black text-rose-400 mt-2">R$ 0,00</h2>
+            </div>
+            <div class="bg-gradient-to-br from-emerald-950/40 to-slate-900/80 p-4 rounded-3xl border border-emerald-500/30 shadow-lg backdrop-blur flex flex-col justify-between">
+                <span class="text-[10px] font-bold text-emerald-400 uppercase tracking-widest">(=) Saldo Líquido Previsto</span>
+                <h2 id="saldoLiquidoReal" class="text-2xl font-black text-blue-400 mt-2">R$ 0,00</h2>
+            </div>
+        </div>
+
+        <!-- Gestão de Lançamentos Manuais -->
+        <div class="bg-slate-900/60 p-5 rounded-3xl border border-slate-800 shadow-lg backdrop-blur space-y-4">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
+                <span>💰</span> Gestão de Entradas, Fixos e Empréstimos:
+            </h3>
+            
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                <label class="flex items-center gap-2 bg-slate-950/60 p-3 rounded-2xl border border-slate-800 cursor-pointer hover:border-slate-700 transition">
+                    <input type="radio" name="tipoLancamento" value="entrada" checked class="text-emerald-500 focus:ring-0">
+                    <span class="text-emerald-400 font-semibold">Entrada</span>
+                </label>
+                <label class="flex items-center gap-2 bg-slate-950/60 p-3 rounded-2xl border border-slate-800 cursor-pointer hover:border-slate-700 transition">
+                    <input type="radio" name="tipoLancamento" value="fixo" class="text-rose-500 focus:ring-0">
+                    <span class="text-rose-400 font-semibold">Custo Fixo</span>
+                </label>
+                <label class="flex items-center gap-2 bg-slate-950/60 p-3 rounded-2xl border border-slate-800 cursor-pointer hover:border-slate-700 transition">
+                    <input type="radio" name="tipoLancamento" value="emprestimo" class="text-amber-500 focus:ring-0">
+                    <span class="text-amber-400 font-semibold">Empréstimo</span>
+                </label>
+                <label class="flex items-center gap-2 bg-slate-950/60 p-3 rounded-2xl border border-slate-800 cursor-pointer hover:border-slate-700 transition">
+                    <input type="radio" name="tipoLancamento" value="assinatura" class="text-purple-500 focus:ring-0">
+                    <span class="text-purple-400 font-semibold">Assinatura</span>
+                </label>
+            </div>
+
+            <div class="space-y-2.5">
+                <div class="flex flex-col sm:flex-row gap-2.5">
+                    <input type="text" id="descLancamento" placeholder="Descrição (Ex: Salário, Aluguel, Netflix...)" class="flex-1 bg-slate-950 border border-slate-800 text-xs text-slate-200 px-3.5 py-3 rounded-2xl focus:outline-none focus:border-emerald-500 transition shadow-inner">
+                    <input type="number" step="0.01" id="valorLancamento" placeholder="Valor R$" class="w-full sm:w-40 bg-slate-950 border border-slate-800 text-xs text-slate-200 px-3.5 py-3 rounded-2xl focus:outline-none focus:border-emerald-500 transition shadow-inner">
+                </div>
+                <button onclick="adicionarLancamentoManual()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold p-3.5 rounded-2xl text-xs transition shadow-lg shadow-emerald-500/20 active:scale-[0.99]">
+                    + Adicionar Lançamento Contínuo
+                </button>
+            </div>
+
+            <div id="listaLancamentosManuais" class="space-y-2.5 pt-1"></div>
+        </div>
+
+        <!-- Botão de Colar Texto da Fatura -->
+        <div class="bg-slate-900/60 p-5 rounded-3xl border border-slate-800 shadow-lg backdrop-blur space-y-3">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
+                <span>⚡</span> Lançar Fatura do Cartão (Raio-X):
+            </h3>
             <div>
-                <button onclick="abrirModalTexto()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-semibold p-3 rounded-xl transition text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/10">
-                    📋 Colar Texto da Fatura
+                <button onclick="abrirModalTexto()" class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-extrabold p-3.5 rounded-2xl transition text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 active:scale-[0.99]">
+                    📋 Colar Texto da Fatura do Mês
                 </button>
             </div>
         </div>
 
-        <!-- Resumo de Caixa (Aba 1) -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
-            <div class="bg-slate-800/60 p-4 rounded-2xl border border-slate-700/40">
-                <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Total Entradas</span>
-                <h2 id="totalEntradas" class="text-xl font-bold text-emerald-400 mt-1">R$ 0,00</h2>
+        <!-- Painel de Gastos Por Categoria -->
+        <div class="bg-slate-900/60 p-5 rounded-3xl border border-slate-800 shadow-lg backdrop-blur">
+            <div class="flex justify-between items-center cursor-pointer select-none" onclick="alternarPainelCategorias()">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
+                    <span>📊</span> TOTAL GASTOS POR CATEGORIA
+                </h3>
+                <button id="btnTogglePainel" class="text-sm bg-slate-800 hover:bg-slate-700 text-slate-300 px-3.5 py-1.5 rounded-xl transition border border-slate-700 font-bold">
+                    ▲
+                </button>
             </div>
-            <div class="bg-slate-800/60 p-4 rounded-2xl border border-slate-700/40">
-                <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Total Saídas (Fatura Fechada)</span>
-                <h2 id="totalSaidas" class="text-xl font-bold text-rose-400 mt-1">R$ 0,00</h2>
-            </div>
-            <div class="bg-slate-800/60 p-4 rounded-2xl border border-slate-700/40">
-                <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Saldo Líquido</span>
-                <h2 id="saldoLiquido" class="text-xl font-bold text-blue-400 mt-1">R$ 0,00</h2>
-            </div>
+            <div id="conteudoPainelCategorias" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5 mt-4 transition-all duration-300"></div>
         </div>
 
-        <!-- Tabela do Raio-X (Aba 2) -->
-        <div class="bg-slate-800/60 rounded-2xl border border-slate-700/40 overflow-hidden backdrop-blur">
-            <div class="p-4 border-b border-slate-700/40 flex justify-between items-center">
+        <!-- Tabela do Raio-X -->
+        <div class="bg-slate-900/60 rounded-3xl border border-slate-800 shadow-lg overflow-hidden backdrop-blur">
+            <div class="p-5 border-b border-slate-800 flex justify-between items-center">
                 <div>
                     <h3 class="font-bold text-sm text-slate-200">Raio-X de Compras e Parcelas Ativas</h3>
-                    <p class="text-[11px] text-slate-400">Somente compras reais (descartes institucionais automáticos).</p>
+                    <p class="text-[11px] text-slate-400">Somente compras reais e parcelas projetadas para este mês.</p>
                 </div>
             </div>
 
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse text-xs">
                     <thead>
-                        <tr class="bg-slate-900/50 text-slate-400 text-[10px] uppercase tracking-wider border-b border-slate-700/40">
-                            <th class="p-3">Descrição da Compra</th>
-                            <th class="p-3">Categoria</th>
-                            <th class="p-3 text-center">Parcela Atual</th>
-                            <th class="p-3 text-right">Valor Parcela</th>
-                            <th class="p-3 text-left min-w-[150px]">Nota / Observação</th>
+                        <tr class="bg-slate-950/60 text-slate-400 text-[10px] uppercase tracking-wider border-b border-slate-800">
+                            <th class="p-3.5">Descrição da Compra</th>
+                            <th class="p-3.5">Categoria</th>
+                            <th class="p-3.5 text-center">Parcela Atual</th>
+                            <th class="p-3.5 text-right">Valor Parcela</th>
+                            <th class="p-3.5 text-left min-w-[160px]">Nota / Observação</th>
                         </tr>
                     </thead>
-                    <tbody id="tabelaRaioX" class="divide-y divide-slate-700/30">
+                    <tbody id="tabelaRaioX" class="divide-y divide-slate-800/60">
                         <tr>
-                            <td colspan="5" class="p-6 text-center text-slate-500">Nenhuma fatura importada. Use o botão acima para colar os dados.</td>
+                            <td colspan="5" class="p-8 text-center text-slate-500">Nenhuma fatura importada. Use o botão acima para colar os dados.</td>
                         </tr>
                     </tbody>
                 </table>
@@ -87,19 +165,34 @@
     </div>
 
     <!-- Modal Colar Texto -->
-    <div id="modalTexto" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
-        <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700 max-w-lg w-full space-y-4">
-            <h3 class="font-bold text-sm text-white">Copie e cole o texto da fatura abaixo:</h3>
-            <textarea id="textoFatura" rows="10" class="w-full bg-slate-900 border border-slate-700 text-xs text-slate-200 p-3 rounded-xl focus:outline-none focus:border-emerald-500" placeholder="Selecione tudo no PDF do seu celular, copie e cole aqui..."></textarea>
-            <div class="flex justify-end gap-2">
-                <button onclick="fecharModalTexto()" class="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-xl text-xs">Cancelar</button>
-                <button onclick="processarTextoBruto()" class="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs">Processar Fatura</button>
+    <div id="modalTexto" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 z-50">
+        <div class="bg-slate-900 p-6 rounded-3xl border border-slate-700 max-w-lg w-full space-y-4 shadow-2xl">
+            <h3 class="font-bold text-sm text-white flex items-center gap-2"><span>📋</span> Copie e cole o texto da fatura abaixo:</h3>
+            <textarea id="textoFatura" rows="10" class="w-full bg-slate-950 border border-slate-800 text-xs text-slate-200 p-3.5 rounded-2xl focus:outline-none focus:border-emerald-500 shadow-inner" placeholder="Selecione tudo no PDF do seu celular, copie e cole aqui..."></textarea>
+            <div class="flex justify-end gap-2.5 pt-2">
+                <button onclick="fecharModalTexto()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2.5 rounded-2xl text-xs font-semibold transition">Cancelar</button>
+                <button onclick="processarTextoBruto()" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold px-5 py-2.5 rounded-2xl text-xs transition shadow-lg shadow-emerald-500/20">Processar Fatura</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmação de Exclusão -->
+    <div id="modalExclusao" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 z-50">
+        <div class="bg-slate-900 p-6 rounded-3xl border border-slate-700 max-w-sm w-full space-y-4 shadow-2xl">
+            <h3 class="font-bold text-sm text-white">Excluir Lançamento</h3>
+            <p class="text-xs text-slate-300">Como você deseja remover este lançamento?</p>
+            <div class="space-y-2.5 pt-2">
+                <button onclick="confirmarExclusao('apenas_este')" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-medium p-3 rounded-2xl text-xs transition border border-slate-700">Excluir SOMENTE deste mês</button>
+                <button onclick="confirmarExclusao('este_e_futuros')" class="w-full bg-rose-600 hover:bg-rose-500 text-white font-bold p-3 rounded-2xl text-xs transition shadow-lg shadow-rose-600/20">Excluir deste mês E DOS PRÓXIMOS</button>
+                <button onclick="fecharModalExclusao()" class="w-full bg-transparent text-slate-400 p-2 text-xs font-medium hover:text-slate-200">Cancelar</button>
             </div>
         </div>
     </div>
 
     <script>
-        let db = JSON.parse(localStorage.getItem('fincontrol_db_v7')) || {};
+        let db = JSON.parse(localStorage.getItem('fincontrol_db_v13')) || { faturas: {}, recorrentes: [], regrasCategorias: {} };
+        let painelRecolhido = localStorage.getItem('fincontrol_painel_recolhido') === 'true';
+        let itemParaExcluirIndex = null;
 
         const termosIgnorar = [
             'total da fatura', 'limite de compras', 'limite de saque', 'recomendado pagamento',
@@ -114,28 +207,138 @@
         ];
 
         const categoriasDisponiveis = [
-            "Pessoal",
-            "Mercado",
-            "Combustível",
-            "Saúde",
-            "Manutenção Casa",
-            "Manutenção carro",
-            "Estudo",
-            "Locomoção",
-            "Lazer",
-            "Presentes"
+            "Pessoal", "Mercado", "Combustível", "Saúde", "Manutenção Casa",
+            "Manutenção carro", "Estudo", "Locomoção", "Lazer", "Presentes"
         ];
 
         function normalizarTexto(txt) {
             return txt.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
         }
 
-        function abrirModalTexto() {
-            document.getElementById('modalTexto').classList.remove('hidden');
+        function exportarDados() {
+            let dadosStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db));
+            let downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dadosStr);
+            downloadAnchor.setAttribute("download", `fincontrol_backup_${new Date().toISOString().slice(0,10)}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
         }
 
-        function fecharModalTexto() {
-            document.getElementById('modalTexto').classList.add('hidden');
+        function importarDados(event) {
+            let file = event.target.files[0];
+            if (!file) return;
+            let reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    let conteudo = JSON.parse(e.target.result);
+                    if (conteudo) {
+                        db = {
+                            faturas: conteudo.faturas || {},
+                            recorrentes: conteudo.recorrentes || [],
+                            regrasCategorias: conteudo.regrasCategorias || {}
+                        };
+                        localStorage.setItem('fincontrol_db_v13', JSON.stringify(db));
+                        renderizarTela();
+                        alert("Backup carregado com sucesso!");
+                    } else {
+                        alert("O ficheiro selecionado não contém dados válidos.");
+                    }
+                } catch (err) {
+                    alert("Erro ao ler o ficheiro de backup.");
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function abrirModalTexto() { document.getElementById('modalTexto').classList.remove('hidden'); }
+        function fecharModalTexto() { document.getElementById('modalTexto').classList.add('hidden'); }
+
+        function alternarPainelCategorias() {
+            painelRecolhido = !painelRecolhido;
+            localStorage.setItem('fincontrol_painel_recolhido', painelRecolhido);
+            atualizarEstadoPainel();
+        }
+
+        function atualizarEstadoPainel() {
+            let conteudo = document.getElementById('conteudoPainelCategorias');
+            let btn = document.getElementById('btnTogglePainel');
+            if (painelRecolhido) {
+                conteudo.classList.add('hidden');
+                btn.innerText = '▼';
+            } else {
+                conteudo.classList.remove('hidden');
+                btn.innerText = '▲';
+            }
+        }
+
+        function adicionarLancamentoManual() {
+            let tipo = document.querySelector('input[name="tipoLancamento"]:checked').value;
+            let descricao = document.getElementById('descLancamento').value.trim();
+            let valor = parseFloat(document.getElementById('valorLancamento').value);
+            let mesInicio = document.getElementById('seletorMes').value;
+
+            if (!descricao || isNaN(valor) || valor <= 0) {
+                alert("Preencha a descrição e um valor válido.");
+                return;
+            }
+
+            if (!db.recorrentes) db.recorrentes = [];
+
+            db.recorrentes.push({
+                id: Date.now(),
+                tipo,
+                descricao,
+                valor,
+                mesInicio,
+                mesFimExclusao: null,
+                exclusoesMês: []
+            });
+
+            localStorage.setItem('fincontrol_db_v13', JSON.stringify(db));
+
+            document.getElementById('descLancamento').value = '';
+            document.getElementById('valorLancamento').value = '';
+            renderizarTela();
+        }
+
+        function solicitarExclusaoManual(id) {
+            itemParaExcluirIndex = id;
+            document.getElementById('modalExclusao').classList.remove('hidden');
+        }
+
+        function fecharModalExclusao() {
+            itemParaExcluirIndex = null;
+            document.getElementById('modalExclusao').classList.add('hidden');
+        }
+
+        function confirmarExclusao(modo) {
+            let mesAtual = document.getElementById('seletorMes').value;
+            let item = db.recorrentes.find(r => r.id === itemParaExcluirIndex);
+
+            if (item) {
+                if (modo === 'apenas_este') {
+                    if (!item.exclusoesMês) item.exclusoesMês = [];
+                    item.exclusoesMês.push(mesAtual);
+                } else if (modo === 'este_e_futuros') {
+                    item.mesFimExclusao = mesAtual;
+                }
+                localStorage.setItem('fincontrol_db_v13', JSON.stringify(db));
+            }
+
+            fecharModalExclusao();
+            renderizarTela();
+        }
+
+        function alterarValorManual(id, novoValor) {
+            let val = parseFloat(novoValor);
+            if (isNaN(val) || val <= 0) return;
+            let item = db.recorrentes.find(r => r.id === id);
+            if (item) {
+                item.valor = val;
+                localStorage.setItem('fincontrol_db_v13', JSON.stringify(db));
+                renderizarTela();
+            }
         }
 
         function processarTextoBruto() {
@@ -151,6 +354,8 @@
             let compras = [];
             let valorFaturaFechada = 0;
 
+            if (!db.regrasCategorias) db.regrasCategorias = {};
+
             linhas.forEach(linha => {
                 let linhaNorm = normalizarTexto(linha);
 
@@ -162,9 +367,7 @@
                     }
                 }
 
-                if (termosIgnorar.some(termo => linhaNorm.includes(termo)) || linha.includes('%')) {
-                    return;
-                }
+                if (termosIgnorar.some(termo => linhaNorm.includes(termo)) || linha.includes('%')) return;
 
                 let matchValor = linha.match(/R?\$?\s*(\d{1,3}(?:\.\d{3})*,\d{2})/);
                 if (!matchValor) return;
@@ -179,7 +382,6 @@
                 matches.forEach(m => {
                     let numAtual = parseInt(m[1], 10);
                     let numTotal = parseInt(m[2], 10);
-
                     if (numAtual <= numTotal && numTotal > 1 && numTotal <= 48 && numTotal !== 26) {
                         parcela = `${String(numAtual).padStart(2, '0')}/${String(numTotal).padStart(2, '0')}`;
                     }
@@ -195,104 +397,235 @@
                     .trim();
 
                 if (nome.length < 3 || nome === "/2026" || nome === "2026") return;
+                let nomeUpper = nome.toUpperCase();
 
                 let categoria = "Pessoal";
-                let nLower = nome.toLowerCase();
-
-                if (nLower.includes("posto") || nLower.includes("combustivel") || nLower.includes("auto posto") || nLower.includes("gas 1")) {
-                    categoria = "Combustível";
-                } else if (nLower.includes("mercado") || nLower.includes("jacomar") || nLower.includes("bonato") || nLower.includes("sacolao") || nLower.includes("condor") || nLower.includes("panif") || nLower.includes("fuchs")) {
-                    categoria = "Mercado";
-                } else if (nLower.includes("farmacia") || nLower.includes("droga") || nLower.includes("saude") || nLower.includes("medprev") || nLower.includes("panvel") || nLower.includes("niss")) {
-                    categoria = "Saúde";
-                } else if (nLower.includes("materiais") || nLower.includes("toka") || nLower.includes("madeira") || nLower.includes("casa china") || nLower.includes("reforma")) {
-                    categoria = "Manutenção Casa";
-                } else if (nLower.includes("uber") || nLower.includes("99app") || nLower.includes("taxi") || nLower.includes("99 pop")) {
-                    categoria = "Locomoção";
-                } else if (nLower.includes("oficina") || nLower.includes("autopecas") || nLower.includes("pneu") || nLower.includes("mecanica")) {
-                    categoria = "Manutenção carro";
-                } else if (nLower.includes("livro") || nLower.includes("curso") || nLower.includes("escola") || nLower.includes("faculdade")) {
-                    categoria = "Estudo";
-                } else if (nLower.includes("netflix") || nLower.includes("spotify") || nLower.includes("cinema") || nLower.includes("ingressos")) {
-                    categoria = "Lazer";
+                if (db.regrasCategorias[nomeUpper]) {
+                    categoria = db.regrasCategorias[nomeUpper];
+                } else {
+                    let nLower = nome.toLowerCase();
+                    if (nLower.includes("posto") || nLower.includes("combustivel") || nLower.includes("auto posto")) categoria = "Combustível";
+                    else if (nLower.includes("mercado") || nLower.includes("jacomar") || nLower.includes("bonato") || nLower.includes("condor")) categoria = "Mercado";
+                    else if (nLower.includes("farmacia") || nLower.includes("saude") || nLower.includes("medprev")) categoria = "Saúde";
+                    else if (nLower.includes("materiais") || nLower.includes("toka") || nLower.includes("madeira")) categoria = "Manutenção Casa";
+                    else if (nLower.includes("oficina") || nLower.includes("autopecas") || nLower.includes("pneu") || nLower.includes("mecanica") || nLower.includes("renesto")) categoria = "Manutenção carro";
                 }
 
-                compras.push({
-                    descricao: nome.toUpperCase(),
-                    categoria: categoria,
-                    parcela: parcela,
-                    valor: valor,
-                    nota: ""
-                });
+                compras.push({ descricao: nomeUpper, categoria, parcela, valor, nota: "" });
             });
 
-            if (valorFaturaFechada === 0) {
-                valorFaturaFechada = compras.reduce((acc, c) => acc + c.valor, 0);
+            if (valorFaturaFechada === 0) valorFaturaFechada = compras.reduce((acc, c) => acc + c.valor, 0);
+
+            if (!db.faturas) db.faturas = {};
+            db.faturas[mesChave] = { faturaFechada: valorFaturaFechada, compras: compras };
+
+            localStorage.setItem('fincontrol_db_v13', JSON.stringify(db));
+            renderizarTela();
+        }
+
+        function obterComprasEParcelasDoMes(mesAlvoStr) {
+            let resultado = [];
+
+            if (db.faturas && db.faturas[mesAlvoStr] && db.faturas[mesAlvoStr].compras) {
+                return JSON.parse(JSON.stringify(db.faturas[mesAlvoStr].compras));
             }
 
-            db[mesChave] = {
-                faturaFechada: valorFaturaFechada,
-                compras: compras
-            };
+            let [anoAlvo, mesAlvo] = mesAlvoStr.split('-').map(Number);
 
-            localStorage.setItem('fincontrol_db_v7', JSON.stringify(db));
-            renderizarTela();
+            if (db.faturas) {
+                Object.keys(db.faturas).forEach(mOrigemKey => {
+                    let [anoOrigem, mesOrigem] = mOrigemKey.split('-').map(Number);
+                    let diffMeses = (anoAlvo - anoOrigem) * 12 + (mesAlvo - mesOrigem);
+
+                    if (diffMeses > 0 && db.faturas[mOrigemKey].compras) {
+                        db.faturas[mOrigemKey].compras.forEach(item => {
+                            if (item.parcela && item.parcela !== "À vista") {
+                                let partes = item.parcela.split('/');
+                                let parcAtualOrigem = parseInt(partes[0], 10);
+                                let parcTotal = parseInt(partes[1], 10);
+
+                                let novaParcelaAtual = parcAtualOrigem + diffMeses;
+
+                                if (novaParcelaAtual <= parcTotal) {
+                                    resultado.push({
+                                        descricao: item.descricao,
+                                        categoria: item.categoria,
+                                        parcela: `${String(novaParcelaAtual).padStart(2, '0')}/${String(parcTotal).padStart(2, '0')}`,
+                                        valor: item.valor,
+                                        nota: item.nota || ""
+                                    });
+                                }
+                            }
+                        });
+                    }
+                });
+            }
+
+            return resultado;
         }
 
         function alterarCategoria(index, novaCategoria) {
             let mesChave = document.getElementById('seletorMes').value;
-            if (db[mesChave] && db[mesChave].compras[index]) {
-                db[mesChave].compras[index].categoria = novaCategoria;
-                localStorage.setItem('fincontrol_db_v7', JSON.stringify(db));
+            let comprasMes = obterComprasEParcelasDoMes(mesChave);
+            
+            if (comprasMes[index]) {
+                let itemModificado = comprasMes[index];
+                itemModificado.categoria = novaCategoria;
+
+                if (!db.regrasCategorias) db.regrasCategorias = {};
+                db.regrasCategorias[itemModificado.descricao] = novaCategoria;
+
+                if (db.faturas && db.faturas[mesChave] && db.faturas[mesChave].compras[index]) {
+                    db.faturas[mesChave].compras[index].categoria = novaCategoria;
+                }
+
+                localStorage.setItem('fincontrol_db_v13', JSON.stringify(db));
+                renderizarTela();
             }
         }
 
         function alterarNota(index, novaNota) {
             let mesChave = document.getElementById('seletorMes').value;
-            if (db[mesChave] && db[mesChave].compras[index]) {
-                db[mesChave].compras[index].nota = novaNota;
-                localStorage.setItem('fincontrol_db_v7', JSON.stringify(db));
+            if (db.faturas && db.faturas[mesChave] && db.faturas[mesChave].compras[index]) {
+                db.faturas[mesChave].compras[index].nota = novaNota;
+                localStorage.setItem('fincontrol_db_v13', JSON.stringify(db));
+            }
+        }
+
+        function excluirItemRaioX(index) {
+            let mesChave = document.getElementById('seletorMes').value;
+            if (db.faturas && db.faturas[mesChave] && db.faturas[mesChave].compras) {
+                db.faturas[mesChave].compras.splice(index, 1);
+                db.faturas[mesChave].faturaFechada = db.faturas[mesChave].compras.reduce((acc, c) => acc + c.valor, 0);
+                localStorage.setItem('fincontrol_db_v13', JSON.stringify(db));
+                renderizarTela();
             }
         }
 
         function renderizarTela() {
             let mesChave = document.getElementById('seletorMes').value;
-            let dadosMes = db[mesChave] || { faturaFechada: 0, compras: [] };
+            
+            let comprasMes = obterComprasEParcelasDoMes(mesChave);
+            let valorFaturaMes = (db.faturas && db.faturas[mesChave]) 
+                ? db.faturas[mesChave].faturaFechada 
+                : comprasMes.reduce((acc, c) => acc + c.valor, 0);
 
-            document.getElementById('totalSaidas').innerText = `R$ ${dadosMes.faturaFechada.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
-            document.getElementById('saldoLiquido').innerText = `R$ ${(-dadosMes.faturaFechada).toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            let totalEntradas = 0;
+            let totalFixosEmprestimos = 0;
+
+            let listaDiv = document.getElementById('listaLancamentosManuais');
+            listaDiv.innerHTML = '';
+
+            let manuaisAtivos = (db.recorrentes || []).filter(item => {
+                if (item.mesInicio > mesChave) return false;
+                if (item.mesFimExclusao && mesChave >= item.mesFimExclusao) return false;
+                if (item.exclusoesMês && item.exclusoesMês.includes(mesChave)) return false;
+                return true;
+            });
+
+            if (manuaisAtivos.length > 0) {
+                manuaisAtivos.forEach(item => {
+                    if (item.tipo === 'entrada') totalEntradas += item.valor;
+                    else totalFixosEmprestimos += item.valor;
+
+                    let corBorda = item.tipo === 'entrada' ? 'border-emerald-500/30 text-emerald-400' :
+                                   item.tipo === 'fixo' ? 'border-rose-500/30 text-rose-400' :
+                                   item.tipo === 'emprestimo' ? 'border-amber-500/30 text-amber-400' : 'border-purple-500/30 text-purple-400';
+
+                    let badgeTexto = item.tipo === 'entrada' ? 'Entrada' :
+                                     item.tipo === 'fixo' ? 'Custo Fixo' :
+                                     item.tipo === 'emprestimo' ? 'Empréstimo' : 'Assinatura';
+
+                    let divItem = document.createElement('div');
+                    divItem.className = `flex flex-col gap-2 bg-slate-950/80 border ${corBorda} p-3.5 rounded-2xl text-xs shadow-inner`;
+                    divItem.innerHTML = `
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="text-[10px] px-2 py-0.5 rounded-lg bg-slate-900 font-bold uppercase tracking-wider">${badgeTexto}</span>
+                            <span class="text-slate-100 font-bold text-sm tracking-wide text-right break-words flex-1">${item.descricao}</span>
+                        </div>
+                        <div class="flex items-center justify-between pt-1 border-t border-slate-900/80">
+                            <span class="text-slate-400 font-medium">Valor: R$</span>
+                            <div class="flex items-center gap-2">
+                                <input type="number" step="0.01" value="${item.valor}" onchange="alterarValorManual(${item.id}, this.value)" class="w-28 bg-slate-900 border border-slate-700/80 text-right px-2.5 py-1.5 rounded-xl text-xs font-bold text-emerald-400 focus:outline-none focus:border-emerald-500 shadow-inner" />
+                                <button onclick="solicitarExclusaoManual(${item.id})" class="text-slate-500 hover:text-rose-400 font-bold p-1.5 rounded-lg hover:bg-rose-500/10 transition" title="Excluir">✕</button>
+                            </div>
+                        </div>
+                    `;
+                    listaDiv.appendChild(divItem);
+                });
+            } else {
+                listaDiv.innerHTML = `<p class="text-[11px] text-slate-500 text-center py-2 italic">Nenhum lançamento recorrente ativo para este mês.</p>`;
+            }
+
+            let saldoReal = totalEntradas - (totalFixosEmprestimos + valorFaturaMes);
+
+            document.getElementById('totalEntradas').innerText = `R$ ${totalEntradas.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            document.getElementById('totalFixosEmprestimos').innerText = `R$ ${totalFixosEmprestimos.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            document.getElementById('totalFaturaCartao').innerText = `R$ ${valorFaturaMes.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            
+            let elSaldo = document.getElementById('saldoLiquidoReal');
+            elSaldo.innerText = `R$ ${saldoReal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            elSaldo.className = `text-2xl font-black mt-2 ${saldoReal >= 0 ? 'text-blue-400' : 'text-rose-400'}`;
+
+            let totaisCategoria = {};
+            categoriasDisponiveis.forEach(cat => totaisCategoria[cat] = 0);
+            
+            comprasMes.forEach(item => {
+                let catEncontrada = categoriasDisponiveis.find(c => c.toLowerCase() === item.categoria.toLowerCase());
+                if (catEncontrada) {
+                    totaisCategoria[catEncontrada] += item.valor;
+                } else {
+                    totaisCategoria["Pessoal"] += item.valor;
+                }
+            });
+
+            let containerCards = document.getElementById('conteudoPainelCategorias');
+            containerCards.innerHTML = '';
+            categoriasDisponiveis.forEach(cat => {
+                let valor = totaisCategoria[cat];
+                let card = document.createElement('div');
+                card.className = `p-3 rounded-2xl border text-left shadow-sm transition ${valor > 0 ? 'bg-slate-950/80 border-slate-700/60' : 'bg-slate-950/30 border-slate-900/50 text-slate-600'}`;
+                card.innerHTML = `
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-tight truncate">${cat}</p>
+                    <p class="text-xs font-black mt-1 ${valor > 0 ? 'text-amber-400' : 'text-slate-600'}">R$ ${valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</p>
+                `;
+                containerCards.appendChild(card);
+            });
+
+            atualizarEstadoPainel();
 
             let tbody = document.getElementById('tabelaRaioX');
             tbody.innerHTML = '';
 
-            if (dadosMes.compras.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-500">Nenhuma fatura importada. Use o botão acima para colar os dados.</td></tr>`;
+            if (comprasMes.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-slate-500 italic">Nenhuma fatura importada ou parcela projetada para este mês.</td></tr>`;
                 return;
             }
 
-            dadosMes.compras.forEach((item, index) => {
+            comprasMes.forEach((item, index) => {
                 let tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-700/20 transition";
+                tr.className = "hover:bg-slate-800/30 transition";
                 
                 let badgeParcela = item.parcela !== "À vista" 
-                    ? `<span class="bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded-md font-semibold text-[10px]">${item.parcela}</span>`
-                    : `<span class="bg-slate-700/40 text-slate-400 px-2 py-0.5 rounded-md text-[10px]">${item.parcela}</span>`;
+                    ? `<span class="bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-1 rounded-lg font-bold text-[10px]">${item.parcela}</span>`
+                    : `<span class="bg-slate-800/40 text-slate-400 px-2 py-1 rounded-lg text-[10px]">${item.parcela}</span>`;
 
                 let optionsCategoria = categoriasDisponiveis.map(cat => 
-                    `<option value="${cat}" ${cat === item.categoria ? 'selected' : ''}>${cat}</option>`
+                    `<option value="${cat}" ${cat.toLowerCase() === item.categoria.toLowerCase() ? 'selected' : ''}>${cat}</option>`
                 ).join('');
 
                 tr.innerHTML = `
-                    <td class="p-3 font-medium text-slate-200">${item.descricao}</td>
-                    <td class="p-3">
-                        <select onchange="alterarCategoria(${index}, this.value)" class="bg-slate-900 border border-slate-700/80 text-slate-300 px-2 py-1 rounded-md text-[11px] focus:outline-none focus:border-emerald-500">
+                    <td class="p-3.5 font-semibold text-slate-200">${item.descricao}</td>
+                    <td class="p-3.5">
+                        <select onchange="alterarCategoria(${index}, this.value)" class="bg-slate-950 border border-slate-700/80 text-slate-300 px-2.5 py-1.5 rounded-xl text-[11px] font-medium focus:outline-none focus:border-emerald-500 shadow-inner">
                             ${optionsCategoria}
                         </select>
                     </td>
-                    <td class="p-3 text-center">${badgeParcela}</td>
-                    <td class="p-3 text-right font-semibold text-slate-200">R$ ${item.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
-                    <td class="p-3">
-                        <input type="text" value="${item.nota || ''}" placeholder="Adicionar nota..." onchange="alterarNota(${index}, this.value)" class="w-full bg-slate-900/60 border border-slate-700/50 text-slate-300 text-[11px] px-2 py-1 rounded-md focus:outline-none focus:border-emerald-500 placeholder:text-slate-600" />
+                    <td class="p-3.5 text-center">${badgeParcela}</td>
+                    <td class="p-3.5 text-right font-black text-slate-200">R$ ${item.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                    <td class="p-3.5 flex items-center justify-between gap-2">
+                        <input type="text" value="${item.nota || ''}" placeholder="Nota..." onchange="alterarNota(${index}, this.value)" class="w-full bg-slate-950 border border-slate-800 text-slate-300 text-[11px] px-2.5 py-1.5 rounded-xl focus:outline-none focus:border-emerald-500 placeholder:text-slate-600 shadow-inner" />
+                        <button onclick="excluirItemRaioX(${index})" class="text-slate-500 hover:text-rose-400 font-bold p-1.5 rounded-lg hover:bg-rose-500/10 transition" title="Excluir item">✕</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
